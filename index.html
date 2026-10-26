@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Logistics Coverage Hub — Live Preview</title>
+<link rel="preconnect" href="https://unpkg.com">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+:root{
+  --navy:#0b3a53;--blue:#155d84;--sky:#eaf4fb;--line:#d8e4ec;
+  --text:#16222a;--muted:#6f7d87;--green:#2f8f5b;--orange:#d97706;
+  --red:#cf4b4b;--white:#fff;--bg:#f4f7f9;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+.topbar{background:linear-gradient(110deg,var(--navy),#0d526f);color:#fff;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.brand h1{margin:0;font-size:21px;letter-spacing:-.2px}.brand p{margin:4px 0 0;font-size:12px;opacity:.76}
+.preview-badge{font-size:11px;font-weight:800;background:#fff3cd;color:#775900;border:1px solid #ffe08a;padding:7px 10px;border-radius:999px;white-space:nowrap}
+.wrap{max-width:1440px;margin:auto;padding:20px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.kpi,.card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 2px 12px rgba(12,48,67,.045)}
+.kpi{padding:16px}.kpi span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}.kpi strong{display:block;font-size:25px;margin-top:6px;color:var(--navy)}
+.search-card{padding:16px;margin-bottom:14px}
+.search-grid{display:grid;grid-template-columns:1fr 48px 1fr 1fr 130px;gap:10px;align-items:end}
+label{display:block;font-size:11px;color:var(--muted);font-weight:700;margin-bottom:6px}
+select,button{width:100%;height:42px;border-radius:10px;border:1px solid #cfdce5;background:#fff;padding:0 12px;font:inherit;color:var(--text)}
+button{background:var(--navy);color:#fff;border:none;font-weight:800;cursor:pointer}
+.swap{height:42px;display:flex;align-items:center;justify-content:center;color:var(--blue);font-weight:900}
+.grid{display:grid;grid-template-columns:1.25fr .75fr;gap:14px}
+.card-h{padding:15px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.card-h h2{margin:0;font-size:15px}.muted{font-size:11px;color:var(--muted)}
+.map-wrap{padding:12px}#coverageMap{height:470px;border-radius:11px;overflow:hidden;background:#dceaf2}
+.legend{display:flex;flex-wrap:wrap;gap:14px;padding:0 15px 14px;color:var(--muted);font-size:10px}
+.legend span{display:flex;gap:6px;align-items:center}.dot{width:8px;height:8px;border-radius:50%}
+.results{padding:12px;max-height:525px;overflow:auto}
+.route-title{font-size:13px;font-weight:800;color:var(--navy);margin:2px 2px 10px}
+.vendor{border:1px solid var(--line);border-radius:12px;padding:13px;margin-bottom:10px}
+.vendor-top{display:flex;justify-content:space-between;gap:12px}.vendor-name{font-weight:900;font-size:14px}.status{font-size:10px;font-weight:800;border-radius:999px;padding:4px 8px;background:#eef7f2;color:var(--green);height:max-content}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:11px;font-size:11px}.meta div{background:#f7fafc;padding:8px;border-radius:8px}.meta b{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;margin-bottom:2px}
+.rate-mask{letter-spacing:2px;font-weight:900}
+.empty{padding:28px 16px;text-align:center;color:var(--muted);font-size:12px}
+.notice{margin-top:14px;background:#fff8e7;border:1px solid #f2d698;color:#725a19;border-radius:12px;padding:12px 14px;font-size:11px;line-height:1.5}
+.leaflet-container{font-family:Inter,Segoe UI,Arial,sans-serif}
+@media(max-width:900px){
+ .kpis{grid-template-columns:1fr 1fr}.search-grid{grid-template-columns:1fr 40px 1fr}.search-grid>div:nth-child(4),.search-grid>button{grid-column:span 3}
+ .grid{grid-template-columns:1fr}.results{max-height:none}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <h1>Logistics Coverage Hub</h1>
+    <p>Vendor Coverage • Route Search • Lead Time • Contact</p>
+  </div>
+  <div class="preview-badge">LIVE PREVIEW • DATA DISENSOR</div>
+</header>
+
+<main class="wrap">
+  <section class="kpis">
+    <div class="kpi"><span>Active Vendors</span><strong>12</strong></div>
+    <div class="kpi"><span>Covered Cities</span><strong>48</strong></div>
+    <div class="kpi"><span>Available Routes</span><strong>176</strong></div>
+    <div class="kpi"><span>Data Quality</span><strong>92%</strong></div>
+  </section>
+
+  <section class="card search-card">
+    <div class="search-grid">
+      <div><label>ORIGIN</label><select id="origin"></select></div>
+      <div class="swap">→</div>
+      <div><label>DESTINATION</label><select id="dest"></select></div>
+      <div><label>SERVICE</label><select id="service"><option>Semua Service</option><option>Darat</option><option>Multimoda</option></select></div>
+      <button id="searchBtn">Search Route</button>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card">
+      <div class="card-h"><h2>Coverage Map — Indonesia</h2><span class="muted">Klik marker kota untuk memilih destination</span></div>
+      <div class="map-wrap"><div id="coverageMap"></div></div>
+      <div class="legend">
+        <span><i class="dot" style="background:#155d84"></i>Kota coverage</span>
+        <span><i class="dot" style="background:#2f8f5b"></i>Origin aktif</span>
+        <span><i class="dot" style="background:#cf4b4b"></i>Destination aktif</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2>Available Vendors</h2><span class="muted" id="resultCount">0 result</span></div>
+      <div class="results" id="results"></div>
+    </div>
+  </section>
+
+  <div class="notice">
+    <b>Preview mode:</b> website ini sengaja tidak memuat Central Master, harga KHS asli, nomor PIC, email vendor, atau dokumen internal. 
+    Setelah tampilan dan flow disetujui, versi internal bisa dihubungkan ke data asli melalui backend + autentikasi.
+  </div>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const ROUTES = [
+ {o:"Jakarta",d:"Kota Medan",v:"Vendor A",mode:"Multimoda",vehicle:"CDD / Fuso / Tronton",lead:"4–6 hari"},
+ {o:"Jakarta",d:"Kota Medan",v:"Vendor B",mode:"Multimoda",vehicle:"CDE / CDD / Fuso",lead:"5–7 hari"},
+ {o:"Jakarta",d:"Kota Surabaya",v:"Vendor A",mode:"Darat",vehicle:"Pickup–Tronton",lead:"2–3 hari"},
+ {o:"Jakarta",d:"Kota Surabaya",v:"Vendor C",mode:"Darat",vehicle:"CDD / Fuso / Tronton",lead:"2–4 hari"},
+ {o:"Jakarta",d:"Kota Semarang",v:"Vendor A",mode:"Darat",vehicle:"Pickup–Tronton",lead:"1–2 hari"},
+ {o:"Jakarta",d:"Kota Semarang",v:"Vendor B",mode:"Darat",vehicle:"CDD / Fuso / Tronton",lead:"2–3 hari"},
+ {o:"Karawang",d:"Kota Surabaya",v:"Vendor A",mode:"Darat",vehicle:"Pickup–Tronton",lead:"2–3 hari"},
+ {o:"Karawang",d:"Kota Surabaya",v:"Vendor C",mode:"Darat",vehicle:"CDD / Fuso / Tronton",lead:"3–4 hari"},
+ {o:"Karawang",d:"Kota Malang",v:"Vendor A",mode:"Darat",vehicle:"Pickup–Tronton",lead:"3–4 hari"},
+ {o:"Surabaya",d:"Kota Semarang",v:"Vendor A",mode:"Darat",vehicle:"Pickup–Tronton",lead:"1–2 hari"},
+ {o:"Medan",d:"Kota Pekanbaru",v:"Vendor B",mode:"Darat",vehicle:"CDD / Fuso",lead:"2–3 hari"},
+ {o:"Palembang",d:"Kota Bandar Lampung",v:"Vendor C",mode:"Darat",vehicle:"CDE / CDD / Fuso",lead:"1–2 hari"}
+];
+const COORDS={
+ "Jakarta":[-6.2088,106.8456],"Karawang":[-6.3054,107.3008],"Surabaya":[-7.2575,112.7521],"Medan":[3.5952,98.6722],"Palembang":[-2.9909,104.7566],
+ "Kota Medan":[3.5952,98.6722],"Kota Pekanbaru":[0.5071,101.4478],"Kota Palembang":[-2.9909,104.7566],"Kota Bandar Lampung":[-5.3971,105.2668],
+ "Kota Bandung":[-6.9175,107.6191],"Kota Semarang":[-6.9667,110.4167],"Kota Surabaya":[-7.2575,112.7521],"Kota Malang":[-7.9666,112.6326],
+ "Kota Yogyakarta":[-7.7956,110.3695],"Kota Padang":[-0.9471,100.4172],"Kota Jambi":[-1.6101,103.6131],"Kota Bengkulu":[-3.7928,102.2608]
+};
+const origins=[...new Set(ROUTES.map(r=>r.o))];
+const destinations=[...new Set(ROUTES.map(r=>r.d))];
+const origin=document.getElementById("origin"),dest=document.getElementById("dest"),service=document.getElementById("service");
+origins.forEach(x=>origin.add(new Option(x,x)));
+destinations.forEach(x=>dest.add(new Option(x,x)));
+origin.value="Jakarta";dest.value="Kota Medan";
+
+const map=L.map("coverageMap",{minZoom:4,maxZoom:12,maxBounds:[[-12,92],[8,142]],maxBoundsViscosity:.7}).setView([-2.2,118],5);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap contributors"}).addTo(map);
+const markers=L.layerGroup().addTo(map);
+let routeLine,originMarker,destMarker;
+
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function addMarkers(){
+ markers.clearLayers();
+ destinations.forEach(city=>{
+   if(!COORDS[city])return;
+   const count=new Set(ROUTES.filter(r=>r.d===city).map(r=>r.v)).size;
+   const m=L.circleMarker(COORDS[city],{radius:7,color:"#fff",weight:2,fillColor:"#155d84",fillOpacity:.95}).addTo(markers);
+   m.bindTooltip(`${city.replace("Kota ","")} • ${count} vendor`,{direction:"top"});
+   m.on("click",()=>{dest.value=city;render()});
+ });
+}
+function updateMap(){
+ if(routeLine)map.removeLayer(routeLine); if(originMarker)map.removeLayer(originMarker); if(destMarker)map.removeLayer(destMarker);
+ const a=COORDS[origin.value],b=COORDS[dest.value];
+ if(a)originMarker=L.circleMarker(a,{radius:9,color:"#fff",weight:3,fillColor:"#2f8f5b",fillOpacity:1}).addTo(map).bindTooltip(`Origin: ${origin.value}`);
+ if(b)destMarker=L.circleMarker(b,{radius:10,color:"#fff",weight:3,fillColor:"#cf4b4b",fillOpacity:1}).addTo(map).bindTooltip(`Destination: ${dest.value}`);
+ if(a&&b){routeLine=L.polyline([a,b],{color:"#155d84",weight:3,dashArray:"8 7"}).addTo(map);map.fitBounds([a,b],{padding:[45,45],maxZoom:7})}
+}
+function render(){
+ let rows=ROUTES.filter(r=>r.o===origin.value&&r.d===dest.value);
+ if(service.value!=="Semua Service")rows=rows.filter(r=>r.mode===service.value);
+ document.getElementById("resultCount").textContent=`${rows.length} vendor`;
+ const box=document.getElementById("results");
+ if(!rows.length){box.innerHTML='<div class="empty">Belum ada data demo untuk rute/filter ini.</div>';updateMap();return}
+ box.innerHTML=`<div class="route-title">${esc(origin.value)} → ${esc(dest.value)}</div>`+rows.map((r,i)=>`
+ <div class="vendor">
+   <div class="vendor-top">
+     <div><div class="vendor-name">${esc(r.v)}</div><div class="muted">${esc(r.mode)}</div></div>
+     <div class="status">DEMO DATA</div>
+   </div>
+   <div class="meta">
+    <div><b>Vehicle</b>${esc(r.vehicle)}</div>
+    <div><b>Lead Time</b>${esc(r.lead)}</div>
+    <div><b>Rate</b><span class="rate-mask">Rp •••••••</span></div>
+    <div><b>Contact</b>Internal only</div>
+   </div>
+ </div>`).join("");
+ updateMap();
+}
+document.getElementById("searchBtn").onclick=render;
+origin.onchange=render;dest.onchange=render;service.onchange=render;
+addMarkers();render();
+setTimeout(()=>map.invalidateSize(),250);
+</script>
+</body>
+</html>
