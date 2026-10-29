@@ -5,7 +5,7 @@ const vm=require('node:vm');
 function publisher(options={}) {
   const properties={PUBLISHER_OWNER_EMAIL:'owner@example.test',CENTRAL_MASTER_ID:'SOURCE',OPS_SPREADSHEET_ID:'OPS',...options.properties};
   const state={writes:[],opens:[],released:false};
-  const hub={loadedAt:'2026-10-29T10:00:00.000Z',vendors:[],routes:[],summary:{vendors:0,activeTransport:0,confirmedPairs:0,destinations:0},quality:{missingCoverage:0,unclassified:0,excludedRoutes:0,nonEligibleRoutes:0}};
+  const hub={loadedAt:'2026-10-29T10:00:00.000Z',vendors:[],routes:[],summary:{vendors:0,activeTransport:0,confirmedPairs:0,destinations:0},quality:{missingCoverage:0,unclassified:0,excludedRoutes:0,nonEligibleRoutes:0,duplicateVendorIds:0}};
   const ctx=vm.createContext({PropertiesService:{getScriptProperties:()=>({getProperty:key=>properties[key]})},Session:{getEffectiveUser:()=>({getEmail:()=>options.email||'owner@example.test'})},LockService:{getScriptLock:()=>({tryLock:()=>true,releaseLock:()=>{state.released=true;}})},loadCentralHub_:()=>hub,digest_:()=> 'digest',SpreadsheetApp:{flush(){},openById:id=>{state.opens.push(id);return {getSheetByName:()=>({getLastColumn:()=>2,getLastRow:()=>options.oldHeight||0,getMaxRows:()=>1000,getRange:()=>({setValues:rows=>state.writes.push(rows)})})};}}});
   vm.runInContext(fs.readFileSync('apps-script/Snapshot.gs','utf8'),ctx);
   // Digest implementation is irrelevant to write targeting; reader tests cover schema separately.

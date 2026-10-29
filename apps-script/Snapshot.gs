@@ -39,9 +39,14 @@ function assertSafeSnapshot_(hub) {
   exactKeys(hub, ['loadedAt', 'vendors', 'routes', 'quality', 'summary']);
   if (typeof hub.loadedAt !== 'string' || !Number.isFinite(Date.parse(hub.loadedAt)) || !Array.isArray(hub.vendors) || !Array.isArray(hub.routes)) throw new Error('schema');
   hub.vendors.forEach(v => textRow(v, ['id','name','status','group','service','base','coverage','commercial'], ['routeCount']));
-  hub.routes.forEach(r => textRow(r, ['id','vendorId','vendorName','origin','destination','mode','service','vehicle','leadMin','leadMax','evidence','commercial']));
+  hub.routes.forEach(r => {
+    const copy = Object.assign({}, r); delete copy.prices;
+    textRow(copy, ['id','vendorId','vendorName','origin','destination','mode','service','vehicle','leadMin','leadMax','evidence','commercial']);
+    if (!Array.isArray(r.prices) || Object.keys(r).length !== Object.keys(copy).length + 1) throw new Error('prices');
+    r.prices.forEach(p => textRow(p, ['routeId','mode','service','vehicle','basis','approved','offer','counter','final']));
+  });
   ['quality','summary'].forEach(key => {
-    const keys = key === 'quality' ? ['missingCoverage','unclassified','excludedRoutes','nonEligibleRoutes'] : ['vendors','activeTransport','confirmedPairs','destinations'];
+    const keys = key === 'quality' ? ['missingCoverage','unclassified','excludedRoutes','nonEligibleRoutes','duplicateVendorIds'] : ['vendors','activeTransport','confirmedPairs','destinations'];
     exactKeys(hub[key], keys);
     if (keys.some(k => !Number.isSafeInteger(hub[key][k]) || hub[key][k] < 0)) throw new Error('count');
   });

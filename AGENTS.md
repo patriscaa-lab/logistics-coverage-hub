@@ -25,6 +25,8 @@ Central Master minimal memiliki tab:
 Jangan mengubah harga approved kecuali diminta secara eksplisit. Pertahankan nilai sumber apa adanya; jangan hitung ulang atau membulatkan nilai komersial approved.
 
 ## Aturan keamanan
+- Instruksi eksplisit pengguna 29 Oktober 2026: tampilkan harga ketika mencari vendor yang sudah memberikan harga. Ini menggantikan larangan harga default di bawah untuk akun internal berizin komersial. Pisahkan approved, penawaran, counter, final dan basis per rute/armada; jangan membulatkan atau menyimpulkan persetujuan.
+- `RATE_VIEWER_EMAILS` adalah role komersial terpisah dari `ALLOWED_EMAILS`. Bootstrap/peta tidak mengirim harga. RPC pencarian mengirim hanya harga rute yang dicari kepada role komersial. Spreadsheet proyeksi berharga hanya boleh dibagikan ke akun komersial yang disetujui.
 - Jangan pernah mengekspos kolom KHS/rate ke browser kecuali user secara eksplisit meminta tampilan internal berbasis role.
 - Repository publik/static tidak boleh menyimpan snapshot Vendor Master, snapshot route, PIC, nomor telepon, email, alamat, atau commercial rate.
 - Apps Script boleh membaca seluruh data Sheet di server-side, tetapi response ke browser harus sudah disanitasi.

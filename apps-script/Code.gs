@@ -20,11 +20,17 @@ function authorize_() {
 
 function getHubData() {
   authorize_();
-  return loadHub_();
+  const hub = loadHub_();
+  // Bootstrap/peta tidak mengirim seluruh daftar harga ke browser.
+  hub.routes.forEach(r => { delete r.prices; });
+  return hub;
 }
 
 function searchRoutes(query) {
-  authorize_();
+  const email = authorize_();
+  const rateViewers = String(PropertiesService.getScriptProperties().getProperty('RATE_VIEWER_EMAILS') || '')
+    .split(',').map(x => x.trim().toLowerCase()).filter(Boolean);
+  const canViewRates = rateViewers.indexOf(email) >= 0;
   if (!query || typeof query.origin !== 'string' || typeof query.destination !== 'string' ||
       !query.origin.trim() || !query.destination.trim() || query.origin.length > 200 || query.destination.length > 200) {
     throw new Error('Pilih origin dan destination yang valid.');
@@ -37,6 +43,8 @@ function searchRoutes(query) {
   return { results: Object.keys(grouped).map(id => {
     const rows = grouped[id];
     const result = Object.assign({}, rows[0]);
+    delete result.prices;
+    if (canViewRates) result.prices = rows.flatMap(r => r.prices || []);
     ['mode', 'service', 'vehicle'].forEach(key => { result[key] = Array.from(new Set(rows.map(r => r[key]).filter(Boolean))).join(', '); });
     const mins = rows.map(r => r.leadMin).filter(x => x !== '' && Number.isFinite(Number(x))).map(Number);
     const maxs = rows.map(r => r.leadMax).filter(x => x !== '' && Number.isFinite(Number(x))).map(Number);
@@ -48,7 +56,7 @@ function searchRoutes(query) {
     result.evidence = contracted === rows.length ? 'Disetujui' : 'Quotation / negosiasi, perlu konfirmasi operasional';
     result.slotCount = rows.length;
     return result;
-  }), loadedAt: hub.loadedAt };
+  }), loadedAt: hub.loadedAt, canViewRates: canViewRates };
 }
 
 function normalize_(value) { return String(value || '').trim().replace(/\s+/g, ' ').toLowerCase(); }
@@ -92,12 +100,19 @@ function loadCentralHub_() {
   catch (e) { throw new Error('Central Master belum dapat dibaca. Hubungi administrator.'); }
   const sourceVendors = readTable_(book, 'Vendor Master', ['Vendor ID', 'Vendor Name', 'Status Vendor', 'Vendor Type', 'Base / Branch', 'Coverage Area Raw']);
   const sourceRoutes = readTable_(book, 'Route & Rate Master', ['Route ID', 'Vendor ID', 'Origin City', 'Destination City', 'Mode', 'Service', 'Vehicle Type', 'Lead Time Min (Day)', 'Lead Time Max (Day)', 'Approval Status', 'Source Confirmation']);
+  const idCounts = Object.create(null);
+  sourceVendors.forEach(row => { const id = row['Vendor ID']; idCounts[id] = (idCounts[id] || 0) + 1; });
   const ids = new Set();
+  const sourceIndex = Object.create(null);
   const vendors = sourceVendors.map(row => {
-    if (!row['Vendor ID'] || !row['Vendor Name'] || ids.has(row['Vendor ID'])) throw new Error('Vendor ID kosong/duplikat atau nama kosong. Perbaiki Central Master.');
-    ids.add(row['Vendor ID']);
-    // Whitelist eksplisit. PIC, phone, email, address, KHS, dan seluruh rate tidak dikembalikan.
-    return { id: row['Vendor ID'], name: row['Vendor Name'], status: row['Status Vendor'],
+    const sourceId = row['Vendor ID'];
+    const id = idCounts[sourceId] > 1 ? sourceId + '::' + encodeURIComponent(normalize_(row['Vendor Name'])) : sourceId;
+    if (!sourceId || !row['Vendor Name'] || ids.has(id)) throw new Error('Vendor ID/nama kosong atau identitas vendor duplikat. Perbaiki Central Master.');
+    ids.add(id);
+    if (!sourceIndex[sourceId]) sourceIndex[sourceId] = [];
+    sourceIndex[sourceId].push({ id: id, name: normalize_(row['Vendor Name']) });
+    // Direktori tidak berisi kontak atau harga. Harga hanya pada bukti rute dan RPC berizin.
+    return { id: id, name: row['Vendor Name'], status: row['Status Vendor'],
       group: group_(row['Vendor Type']), service: row['Vendor Type'], base: row['Base / Branch'], coverage: row['Coverage Area Raw'] };
   });
   const byId = Object.create(null);
@@ -106,7 +121,9 @@ function loadCentralHub_() {
   const routeIds = new Set();
   const routes = [];
   sourceRoutes.forEach(row => {
-    const vendor = byId[row['Vendor ID']];
+    const candidates = sourceIndex[row['Vendor ID']] || [];
+    const matched = candidates.length === 1 ? candidates[0] : candidates.find(v => v.name === normalize_(row['Vendor Name']));
+    const vendor = matched ? byId[matched.id] : null;
     const approval = row['Approval Status'];
     const confirmation = row['Source Confirmation'];
     // Status yang terbukti pada Central Master. Nilai baru/ambigu memerlukan review, bukan asumsi coverage.
@@ -119,7 +136,8 @@ function loadCentralHub_() {
       origin: row['Origin City'], destination: row['Destination City'],
       mode: row['Mode'], service: row['Service'], vehicle: row['Vehicle Type'],
       leadMin: row['Lead Time Min (Day)'], leadMax: row['Lead Time Max (Day)'],
-      approval: approval, evidence: approval === 'APPROVED' ? 'Disetujui' : 'Quotation / negosiasi, perlu konfirmasi operasional' };
+      approval: approval, evidence: approval === 'APPROVED' ? 'Disetujui' : 'Quotation / negosiasi, perlu konfirmasi operasional',
+      prices: priceRows_(row) };
     routes.push(route);
   });
   vendors.forEach(v => {
@@ -134,9 +152,18 @@ function loadCentralHub_() {
     loadedAt: new Date().toISOString(), vendors: vendors, routes: eligible,
     quality: { missingCoverage: vendors.filter(v => !v.coverage).length,
       unclassified: vendors.filter(v => v.group === 'Perlu klasifikasi').length,
-      excludedRoutes: excluded, nonEligibleRoutes: routes.length - eligible.length },
+      excludedRoutes: excluded, nonEligibleRoutes: routes.length - eligible.length,
+      duplicateVendorIds: Object.keys(idCounts).filter(id => idCounts[id] > 1).length },
     summary: { vendors: vendors.length, activeTransport: vendors.filter(v => v.status === 'Aktif' && v.group === 'Ekspedisi / Transport').length,
       confirmedPairs: new Set(eligible.map(r => normalize_(r.origin) + '\u0000' + normalize_(r.destination))).size,
       destinations: new Set(eligible.map(r => normalize_(r.destination))).size }
   };
+}
+
+function priceRows_(row) {
+  const price = { routeId: row['Route ID'], mode: row['Mode'], service: row['Service'], vehicle: row['Vehicle Type'],
+    basis: row['Rate Basis'] || '', approved: row['Approval Status'] === 'APPROVED' ? (row['Approved Rate'] || '') : '',
+    offer: row['Vendor Offer Rate'] || '', counter: row['Vendor Counter Rate'] || '', final: row['Final Vendor Rate'] || '' };
+  // Pertahankan string tampilan sumber; tanpa Number(), pembulatan, min/max, atau tebakan harga.
+  return price.approved || price.offer || price.counter || price.final ? [price] : [];
 }

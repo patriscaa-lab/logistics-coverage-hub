@@ -27,8 +27,8 @@ Manifest web memakai `USER_ACCESSING` dan `ANYONE` (pengguna yang login, bukan `
 2. Buat proyek Apps Script privat khusus pemilik. Masukkan `publisher/Publisher.gs`, `apps-script/Code.gs`, dan `apps-script/Snapshot.gs`. Gunakan manifest dari folder `publisher/`. Jangan deploy proyek ini sebagai web app atau membagikan editornya ke tim.
 3. Isi Script Properties publisher: `PUBLISHER_OWNER_EMAIL`, `CENTRAL_MASTER_ID`, `OPS_SPREADSHEET_ID`. Source dan tujuan harus berbeda. Jangan commit akun, token, atau konfigurasi sumber ke repo publik.
 4. Jalankan `syncOperationalSnapshot()` dari editor sebagai pemilik. Skrip membaca master lalu menulis tab `Operational Snapshot` di spreadsheet tujuan. Tidak menulis atau menghitung ulang approved price.
-5. Periksa proyeksi sebelum sharing: hanya vendor/rute operasional dan agregasi kualitas data. PIC, telepon, email vendor, alamat, kolom KHS, nominal, dan snapshot sumber tidak disalin.
-6. Bagikan spreadsheet operasional sebagai Viewer hanya kepada akun tim yang disetujui. Jangan aktifkan Anyone with the link. Ikuti persetujuan sharing yang diwajibkan alat.
+5. Periksa proyeksi sebelum sharing: vendor/rute operasional, agregasi kualitas data, serta harga vendor per armada yang diminta eksplisit pengguna. PIC, telepon, email vendor, alamat, target negosiasi internal Prasetia, dan snapshot sumber tidak disalin. Nilai harga menggunakan string tampilan sumber tanpa hitung ulang/pembulatan.
+6. Karena proyeksi kini memuat harga, bagikan sebagai Viewer hanya kepada akun komersial yang disetujui. Jangan masukkan pengguna tanpa izin harga ke spreadsheet ini; role aplikasi tidak membatasi orang yang sudah memiliki akses langsung ke spreadsheet. Jangan aktifkan Anyone with the link. Ikuti persetujuan sharing yang diwajibkan alat.
 7. Opsional: jalankan `installOperationalSyncTrigger()` untuk membuat satu trigger sinkronisasi setiap lima menit. Tidak ada trigger yang diaktifkan otomatis saat web app dibuka. Pantau kegagalan di Apps Script.
 
 Payload JSON dipotong maksimal 30.000 karakter per sel. Pembaca memeriksa schema dan SHA-256, sehingga pembacaan parsial ditolak. Publisher memakai Script Lock dan satu operasi penulisan payload beserta metadata. Salinan lama tetap tersedia bila pembentukan proyeksi baru gagal sebelum penulisan. Spreadsheet tujuan harus khusus salinan operasional.
@@ -36,7 +36,7 @@ Payload JSON dipotong maksimal 30.000 karakter per sel. Pembaca memeriksa schema
 ## Pemasangan web app Gmail
 
 1. Cadangkan source serta versi deployment sebelumnya. Pasang semua file dari `apps-script/` pada proyek web yang digunakan. Backend dan frontend harus diganti bersama; RPC baru tidak kompatibel dengan UI lama.
-2. Isi Script Properties web: `ALLOWED_EMAILS` (email tim dipisahkan koma), `OPS_SPREADSHEET_ID`. Jangan isi `CENTRAL_MASTER_ID`; hapus konfigurasi master lama pada proyek web setelah migrasi terverifikasi.
+2. Isi Script Properties web: `ALLOWED_EMAILS`, `RATE_VIEWER_EMAILS` (akun komersial yang diizinkan melihat harga; email dipisahkan koma), `OPS_SPREADSHEET_ID`. Dua akun awal yang disetujui pengguna mendapat akses aplikasi dan harga. Jangan isi `CENTRAL_MASTER_ID`; hapus konfigurasi master lama pada proyek web setelah migrasi terverifikasi.
 3. Deploy sebagai User accessing the web app, akses Anyone with Google account. Jangan pilih akses anonim atau eksekusi sebagai pemilik untuk alur Gmail ini.
 4. Setiap akun tim membuka aplikasi dan menyetujui otorisasi Google yang diperlukan. Tinjau layar persetujuan/verification sesuai konfigurasi proyek; akses Gmail harus diuji di runtime asli.
 5. Uji akun yang diizinkan, akun di luar allowlist, akun tanpa izin spreadsheet, serta sesi tanpa login. Uji pula bahwa akun tim tidak dapat membaca Central Master.
@@ -49,6 +49,8 @@ Daftar akun nyata berada pada konfigurasi runtime dan sharing Google. Menambah a
 Refresh Data membaca salinan operasional terbaru, tidak menjalankan pembacaan master sebagai pemilik. UI menampilkan waktu sinkronisasi. Perubahan master terlihat setelah publisher berhasil dijalankan, manual atau melalui trigger opsional. Jangan menjanjikan perubahan master langsung terlihat saat user menekan Refresh.
 
 ## Aturan data dan review
+
+Instruksi terbaru pengguna mengaktifkan tampilan harga pada hasil pencarian bagi akun internal berizin. Bootstrap/peta tetap tidak memuat harga. RPC pencarian hanya mengembalikan harga untuk rute terpilih kepada `RATE_VIEWER_EMAILS`. UI menampilkan Approved, Penawaran vendor, Counter vendor, Final vendor, basis, dan armada pada baris masing-masing. Nilai kosong tidak dianggap nol; harga negosiasi tidak dilabeli approved. Konfigurasi tidak pernah memberi akses harga hanya karena akun memakai domain gmail.com.
 
 - Join vendor memakai ID. Origin dan destination harus cocok berpasangan; arah balik terpisah.
 - Bukti yang dikenali: `APPROVED` + `Setuju`, `COUNTER / NOT APPROVED` + `Tidak Setuju`, dan `VENDOR OFFER - APPROVAL NOT RECORDED` + `No approval column in source`.
