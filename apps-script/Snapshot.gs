@@ -4,10 +4,15 @@ function loadHub_() {
   if (!id) throw new Error('Salinan operasional belum dikonfigurasi. Hubungi administrator.');
   let values;
   try {
-    const sheet = SpreadsheetApp.openById(id).getSheetByName('Operational Snapshot');
-    if (!sheet || sheet.getLastRow() < 4 || sheet.getLastRow() > 1000 || sheet.getLastColumn() !== 2) throw new Error('snapshot');
-    values = sheet.getRange(1, 1, sheet.getLastRow(), 2).getDisplayValues();
-  } catch (e) { throw new Error('Salinan operasional belum dapat dibaca. Periksa akses akun dengan administrator.'); }
+    // SpreadsheetApp.openById memerlukan scope tulis Sheets, bahkan untuk operasi baca.
+    // Advanced Sheets API mendukung spreadsheets.readonly yang dipakai web app.
+    const response = Sheets.Spreadsheets.Values.get(id, "'Operational Snapshot'!A1:B1000", { valueRenderOption: 'FORMATTED_VALUE' });
+    values = (response.values || []).map(row => [String(row[0] || ''), String(row[1] || '')]);
+    if (values.length < 4) throw new Error('snapshot');
+  } catch (e) {
+    console.error('LCH_SNAPSHOT_READ: ' + String(e.message || e));
+    throw new Error('Salinan operasional belum dapat dibaca. Periksa akses akun dengan administrator.');
+  }
   if (values[0][0] !== 'schema' || values[0][1] !== '1' || values[1][0] !== 'syncedAt' || values[2][0] !== 'sha256') {
     throw new Error('Format salinan operasional tidak sesuai.');
   }

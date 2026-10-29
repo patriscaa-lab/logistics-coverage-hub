@@ -16,6 +16,7 @@ Manifest web memakai `USER_ACCESSING` dan `ANYONE` (pengguna yang login, bukan `
 - `apps-script/Snapshot.gs`: pembacaan salinan dengan pemeriksaan digest dan schema whitelist.
 - `apps-script/Index.html`: dashboard, peta, direktori, pencarian, detail dan perbandingan vendor.
 - `apps-script/appsscript.json`: scope baca-saja dan identitas pengguna yang mengakses.
+  Manifest juga mengaktifkan Advanced Sheets Service v4. Pembacaan web memakai `Sheets.Spreadsheets.Values.get`, karena `SpreadsheetApp.openById` membutuhkan scope Sheets penuh walaupun dipakai hanya untuk membaca. Proyek Cloud default mengaktifkan API melalui advanced service; bila memakai proyek Cloud standar, administrator harus memastikan Sheets API sudah aktif.
 - `publisher/Publisher.gs`: sinkronisasi pemilik pada proyek terpisah.
 - `publisher/appsscript.json`: scope tulis khusus publisher.
 - `tests/backend.test.cjs`: pengujian sintetis; tidak menyimpan snapshot internal.
