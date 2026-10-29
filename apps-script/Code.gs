@@ -83,7 +83,8 @@ function commercial_(rows) {
   return 'Available — Rate Pending';
 }
 
-function loadHub_() {
+// Hanya dipakai oleh proyek publisher privat. Bukan endpoint web app.
+function loadCentralHub_() {
   const id = PropertiesService.getScriptProperties().getProperty('CENTRAL_MASTER_ID');
   if (!id) throw new Error('Administrator belum mengatur Central Master.');
   let book;

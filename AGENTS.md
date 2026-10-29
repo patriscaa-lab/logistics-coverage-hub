@@ -4,6 +4,10 @@
 Bangun dan pelihara Logistics Coverage Hub internal untuk tim Logistik PT Prasetia Dwidharma. Aplikasi ini ditujukan untuk penggunaan operasional harian, bukan sebagai demo publik.
 
 ## Keputusan arsitektur saat ini
+- Klarifikasi pengguna 29 Oktober 2026: tim memakai Gmail biasa, tanpa Google Workspace.
+- Untuk Gmail, web app berjalan sebagai pengguna yang mengakses, memakai allowlist akun dan spreadsheet operasional tersanitasi yang dibagikan sebagai Viewer ke akun tim yang disetujui.
+- Central Master tetap sumber utama privat. Publisher terpisah milik pemilik menyinkronkan proyeksi aman; proyek web tidak diberi konfigurasi master. Akun nyata berada di konfigurasi runtime, bukan repo publik.
+- Refresh Data membaca proyeksi operasional terbaru; perubahan master terlihat setelah sinkronisasi berhasil. Tampilkan waktu sinkronisasi dengan jujur.
 - Aplikasi production: Google Apps Script Web App.
 - Sumber data utama: Google Sheet `Logistics Coverage Hub - Central Master`.
 - GitHub Pages bukan aplikasi production dan tidak boleh menjadi URL operasional yang dilihat user.
@@ -127,9 +131,9 @@ Tidak semua Vendor Master punya structured coverage yang lengkap. UI harus menam
 Confirmed route evidence baru tersedia untuk sebagian vendor; Vendor Directory tetap harus menampilkan vendor non-contract/non-KHS berdasarkan capability/status.
 
 ## Ekspektasi implementasi Google Apps Script
-- `Code.gs` membaca Central Master di server-side.
+- Helper privat `Code.gs` pada proyek publisher membaca Central Master di server-side; web app Gmail membaca proyeksi operasional aman melalui `Snapshot.gs`.
 - `Index.html` adalah UI internal.
-- Sediakan tombol `Refresh Data` agar perubahan di Central Master bisa dibaca ulang tanpa membuat snapshot static baru.
+- Sediakan tombol `Refresh Data` untuk membaca proyeksi operasional terbaru setelah sinkronisasi, tanpa membuat snapshot pada repository/static hosting.
 - Hindari mengirim field rate ke JavaScript browser.
 - Jika memungkinkan, lakukan filter/aggregation data sensitif di server-side.
 

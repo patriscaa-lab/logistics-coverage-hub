@@ -1,52 +1,69 @@
 # Logistics Coverage Hub
 
-Portal internal Logistik PT Prasetia Dwidharma. Konteks dan aturan produk utama berada pada `AGENTS.md`.
+Portal internal Logistik PT Prasetia Dwidharma. `AGENTS.md` adalah konteks utama proyek. Pengguna memakai Gmail biasa, tanpa Google Workspace.
 
-## Implementasi
+## Arsitektur Gmail
 
-- `apps-script/Code.gs`: backend baca-saja Central Master, allowlist akun, proyeksi field aman, validasi bukti rute, agregasi kualitas data.
-- `apps-script/Index.html`: dashboard, peta Leaflet, pencarian origin → destination, direktori tabel, detail dan perbandingan maksimal tiga vendor.
-- `apps-script/appsscript.json`: manifest dengan scope Sheets baca-saja; default deployment hanya pemilik.
-- `tests/backend.test.cjs`: pengujian memakai data sintetis, tidak menyimpan snapshot internal.
-- `index.html`: landing lama. Bukan aplikasi operasional.
+Central Master privat → publisher privat sebagai pemilik → spreadsheet operasional tersanitasi → web app berjalan sebagai pengguna yang login → allowlist akun pada setiap RPC.
 
-Jalankan pengujian dari root repo:
+Eksekusi sebagai pengguna memerlukan izin pengguna untuk membaca spreadsheet sumber aplikasi. Sumber web app harus salinan operasional, bukan Central Master berisi harga. Lihat [Web Apps Google](https://developers.google.com/apps-script/guides/web) dan [Session Google](https://developers.google.com/apps-script/reference/base/session).
+
+Manifest web memakai `USER_ACCESSING` dan `ANYONE` (pengguna yang login, bukan `ANYONE_ANONYMOUS`). Gerbang login Google tidak menggantikan allowlist aplikasi dan akses Viewer spreadsheet. Akun tim tidak memerlukan akses Central Master maupun editor proyek.
+
+## Source
+
+- `apps-script/Code.gs`: RPC, allowlist, helper privat pembentukan proyeksi.
+- `apps-script/Snapshot.gs`: pembacaan salinan dengan pemeriksaan digest dan schema whitelist.
+- `apps-script/Index.html`: dashboard, peta, direktori, pencarian, detail dan perbandingan vendor.
+- `apps-script/appsscript.json`: scope baca-saja dan identitas pengguna yang mengakses.
+- `publisher/Publisher.gs`: sinkronisasi pemilik pada proyek terpisah.
+- `publisher/appsscript.json`: scope tulis khusus publisher.
+- `tests/backend.test.cjs`: pengujian sintetis; tidak menyimpan snapshot internal.
+- `index.html`: landing lama, bukan aplikasi operasional.
+
+## Pemasangan publisher privat
+
+1. Buat spreadsheet kosong khusus operasional, terpisah dari master; akses Restricted. Jangan menyalin seluruh workbook master.
+2. Buat proyek Apps Script privat khusus pemilik. Masukkan `publisher/Publisher.gs`, `apps-script/Code.gs`, dan `apps-script/Snapshot.gs`. Gunakan manifest dari folder `publisher/`. Jangan deploy proyek ini sebagai web app atau membagikan editornya ke tim.
+3. Isi Script Properties publisher: `PUBLISHER_OWNER_EMAIL`, `CENTRAL_MASTER_ID`, `OPS_SPREADSHEET_ID`. Source dan tujuan harus berbeda. Jangan commit akun, token, atau konfigurasi sumber ke repo publik.
+4. Jalankan `syncOperationalSnapshot()` dari editor sebagai pemilik. Skrip membaca master lalu menulis tab `Operational Snapshot` di spreadsheet tujuan. Tidak menulis atau menghitung ulang approved price.
+5. Periksa proyeksi sebelum sharing: hanya vendor/rute operasional dan agregasi kualitas data. PIC, telepon, email vendor, alamat, kolom KHS, nominal, dan snapshot sumber tidak disalin.
+6. Bagikan spreadsheet operasional sebagai Viewer hanya kepada akun tim yang disetujui. Jangan aktifkan Anyone with the link. Ikuti persetujuan sharing yang diwajibkan alat.
+7. Opsional: jalankan `installOperationalSyncTrigger()` untuk membuat satu trigger sinkronisasi setiap lima menit. Tidak ada trigger yang diaktifkan otomatis saat web app dibuka. Pantau kegagalan di Apps Script.
+
+Payload JSON dipotong maksimal 30.000 karakter per sel. Pembaca memeriksa schema dan SHA-256, sehingga pembacaan parsial ditolak. Publisher memakai Script Lock dan satu operasi penulisan payload beserta metadata. Salinan lama tetap tersedia bila pembentukan proyeksi baru gagal sebelum penulisan. Spreadsheet tujuan harus khusus salinan operasional.
+
+## Pemasangan web app Gmail
+
+1. Cadangkan source serta versi deployment sebelumnya. Pasang semua file dari `apps-script/` pada proyek web yang digunakan. Backend dan frontend harus diganti bersama; RPC baru tidak kompatibel dengan UI lama.
+2. Isi Script Properties web: `ALLOWED_EMAILS` (email tim dipisahkan koma), `OPS_SPREADSHEET_ID`. Jangan isi `CENTRAL_MASTER_ID`; hapus konfigurasi master lama pada proyek web setelah migrasi terverifikasi.
+3. Deploy sebagai User accessing the web app, akses Anyone with Google account. Jangan pilih akses anonim atau eksekusi sebagai pemilik untuk alur Gmail ini.
+4. Setiap akun tim membuka aplikasi dan menyetujui otorisasi Google yang diperlukan. Tinjau layar persetujuan/verification sesuai konfigurasi proyek; akses Gmail harus diuji di runtime asli.
+5. Uji akun yang diizinkan, akun di luar allowlist, akun tanpa izin spreadsheet, serta sesi tanpa login. Uji pula bahwa akun tim tidak dapat membaca Central Master.
+6. Setelah UAT, perbarui deployment yang sama agar URL konsisten. Rollback dengan memilih versi deployment sebelumnya. Jangan menghapus kontrol akses sebagai workaround.
+
+Daftar akun nyata berada pada konfigurasi runtime dan sharing Google. Menambah anggota memerlukan allowlist dan akses Viewer; pencabutan harus dilakukan pada keduanya. Salinan yang sudah diunduh tidak dapat ditarik kembali.
+
+## Refresh dan kesegaran data
+
+Refresh Data membaca salinan operasional terbaru, tidak menjalankan pembacaan master sebagai pemilik. UI menampilkan waktu sinkronisasi. Perubahan master terlihat setelah publisher berhasil dijalankan, manual atau melalui trigger opsional. Jangan menjanjikan perubahan master langsung terlihat saat user menekan Refresh.
+
+## Aturan data dan review
+
+- Join vendor memakai ID. Origin dan destination harus cocok berpasangan; arah balik terpisah.
+- Bukti yang dikenali: `APPROVED` + `Setuju`, `COUNTER / NOT APPROVED` + `Tidak Setuju`, dan `VENDOR OFFER - APPROVAL NOT RECORDED` + `No approval column in source`.
+- Dua status terakhir adalah bukti quotation/negosiasi, bukan kesiapan pemesanan. Nilai ambigu, ID duplikat, atau rute tidak lengkap dihitung sebagai gap.
+- Hanya vendor transport Aktif masuk rekomendasi. Direktori tetap memuat vendor tanpa kontrak dan status lain.
+- Base/Branch dan coverage mentah tidak dipakai untuk mengarang pasangan rute. Coverage kosong tetap dinyatakan belum diisi.
+- Leaflet dimuat dari unpkg, tile dari OpenStreetMap. Referensi koordinat hanya menempatkan kota dari bukti rute. Kota yang tidak cocok persis dihitung belum terpetakan.
+- Jarak adalah haversine garis lurus antarpusat kota, bukan jarak jalan atau dasar tarif.
+
+Repo awal hanya berisi landing dan AGENTS.md. Salinan source lama di Downloads telah direview: pemeriksaan akses opsional ketika ALLOWED_DOMAIN kosong, pencarian belum menyaring status/kelompok vendor di server, dan banyak label UI kecil. Versi ini memperketat akses/proyeksi, menambah perbandingan, dan memakai body/table 14 px. Detail kontak belum ditampilkan.
+
+## Validasi
 
 ```sh
-node --test tests/backend.test.cjs
+node --test tests/backend.test.cjs tests/publisher.test.cjs
 ```
 
-## Menyiapkan Apps Script
-
-1. Gunakan editor proyek Apps Script operasional yang sudah ada. Cadangkan source dan catat versi deployment sebelumnya sebelum mengganti kode. Salinan source lama ditemukan di Downloads, tetapi kesesuaiannya dengan versi live masih perlu diperiksa di editor asli. API UI baru memakai `getHubData()` dan `searchRoutes({origin,destination})`; ganti backend dan frontend bersama-sama, jangan mencampur versi.
-2. Masukkan `Code.gs`, `Index.html`, dan `appsscript.json` dari folder `apps-script/`. Jangan upload `index.html` landing sebagai UI Apps Script.
-3. Di Project Settings → Script Properties, isi `CENTRAL_MASTER_ID` dengan ID Central Master yang terverifikasi dan `ALLOWED_EMAILS` dengan daftar email tim Logistik dipisahkan koma. Jangan simpan daftar akun, ID data operasional, atau token ke repo publik.
-4. Uji dulu dengan akses hanya pemilik. Backend memerlukan header baris 4 yang sesuai dengan Central Master; tidak membuat atau mengubah tab/sel apa pun.
-5. Untuk penggunaan tim pada Google Workspace yang sama, administrator dapat memilih eksekusi sebagai pemilik dan akses terbatas organisasi, lalu tetap membatasi daftar akun di server. Jangan aktifkan akses anonim. Identitas yang kosong selalu ditolak. Pastikan akun pemilik dapat membaca Sheet.
-6. Uji memakai akun tim yang diizinkan, akun organisasi di luar allowlist, serta sesi tanpa login. Jika identitas pengguna tidak tersedia pada konfigurasi akun tersebut, hentikan go-live dan tinjau konfigurasi identitas bersama administrator; jangan menghapus pemeriksaan akses.
-7. Perbarui deployment yang sudah ada dengan versi baru setelah UAT, supaya URL operasional tetap konsisten. Simpan nomor versi sebelumnya untuk rollback.
-
-Email pengguna aktif dapat kosong pada konteks tertentu, terutama web app yang berjalan dengan otorisasi developer. Lihat [dokumentasi Session Google](https://developers.google.com/apps-script/reference/base/session). Kode tidak pernah menggunakan effective user sebagai pengganti identitas pengunjung.
-
-## Aturan interpretasi data
-
-- Join berdasarkan Vendor ID, bukan tebakan nama vendor.
-- Status sumber yang saat ini dikenali: `APPROVED` + `Setuju`; `COUNTER / NOT APPROVED` + `Tidak Setuju`; dan `VENDOR OFFER - APPROVAL NOT RECORDED` + `No approval column in source`.
-- Dua status terakhir menunjukkan bukti quotation/negosiasi, **bukan persetujuan harga atau kesiapan pemesanan**. UI menampilkan peringatan konfirmasi operasional. Nilai baru/ambigu, ID duplikat, atau origin/destination kosong dikecualikan dan dihitung pada kualitas data.
-- Rekomendasi default hanya vendor transport berstatus Aktif. Direktori tetap mencakup vendor tanpa kontrak dan vendor di kelompok/status lain.
-- Tipe vendor yang belum dikenal menjadi `Perlu klasifikasi`, bukan otomatis transport.
-- Base/Branch tidak dipakai untuk menyimpulkan origin atau coverage. Coverage mentah tidak dipakai untuk membuat pasangan rute.
-- Kesiapan komersial diturunkan dari status persetujuan, tanpa mengirim kolom KHS atau nominal apa pun. Approved price tidak dibaca untuk perhitungan dan tidak ditulis ulang.
-- Refresh membaca langsung Sheet; tidak ada cache/snapshot vendor di file statis.
-- Marker hanya memakai kota pada rute yang lolos filter dan cocok persis dengan referensi koordinat publik pada UI. Kota lain dihitung sebagai belum terpetakan. Jarak merupakan haversine garis lurus antarpusat kota, bukan jarak berkendara atau dasar penetapan harga.
-- Leaflet dimuat dari unpkg dan tile dari OpenStreetMap. Jaringan pengguna harus dapat mengakses keduanya. Tile tidak menerima nama vendor; penyedia tile dapat melihat alamat IP dan wilayah peta yang dimuat. Untuk skala internal besar, administrator perlu menilai layanan tile yang sesuai.
-
-## Review dan batas verifikasi
-
-Source yang ditemukan pada branch utama sebelum pekerjaan ini hanya landing dan `AGENTS.md`. Salinan `Code (1).gs` dan `Index (1).html` kemudian ditemukan di folder Downloads dan direview. Belum dapat dipastikan bahwa salinan tersebut identik dengan deployment live. Implementasi baru mengikuti header dan nilai status yang diperiksa langsung pada Central Master, tanpa mengubah Sheet.
-
-Temuan review salinan sebelumnya: pemeriksaan akses bersifat opsional bila `ALLOWED_DOMAIN` kosong; pencarian belum menyaring kelompok/status vendor di backend; bootstrap menggabungkan semua rute ke metrik tanpa validasi bukti; detail mengirim kontak dan informasi KHS; banyak label UI berukuran 8–10 px. Source baru memperketat akses dan whitelist, memvalidasi bukti/status, memakai tabel 14 px, dan menambah perbandingan. Kontak tidak ditampilkan pada versi ini; penambahan kontak memerlukan rancangan akses khusus yang disepakati.
-
-Pengujian lokal mencakup akses, kebocoran field, pasangan rute, status vendor, data kosong/ambigu, refresh, quotation, serta sintaks UI/manifest. Pengujian lokal tidak menggantikan UAT di runtime Google.
-
-Sebelum production: verifikasi identitas pada deployment asli, jumlah hasil terhadap Sheet terbaru, filter/status vendor, pemuatan peta, fungsi Refresh Data, navigasi keyboard/mobile, serta penolakan akun di luar allowlist. Tidak ada custom domain atau deployment Google yang otomatis dibuat oleh paket ini. Custom domain memerlukan keputusan dan konfigurasi infrastruktur perusahaan; jangan menjanjikan pemetaan domain langsung ke Apps Script tanpa validasi.
+Pengujian lokal memakai mock layanan Google. QA visual, otorisasi akun Gmail, izin spreadsheet, sinkronisasi publisher/trigger, dan UAT deployment tetap harus diperiksa di runtime asli. Paket source ini belum mengaktifkan sharing, trigger, deployment Google, atau custom domain.
