@@ -121,6 +121,8 @@ Home/dashboard harus terasa seperti portal logistik profesional:
 - Hierarki visual kuat, spacing lega, typography mudah dibaca, palette biru/navy corporate.
 
 ## Perilaku map
+- Klarifikasi 30 Oktober 2026: highlight utama adalah **kota tujuan dengan harga tercatat**, dari semua asal yang memiliki bukti pasangan rute. Jangan menyorot kota hanya karena menjadi origin. Penawaran/counter/final dan approved dibedakan; ketersediaan harga dihitung server-side tanpa mengirim nilai ke bootstrap.
+- URL GPT Site menjadi halaman masuk publik tanpa data operasional, menuju aplikasi Google yang tetap privat. Pengguna menyetujui audience publik hanya untuk halaman masuk ini; TinyURL tidak digunakan sebagai tautan utama.
 - Gunakan peta geografis sungguhan, bukan bentuk pulau schematic.
 - Tampilkan marker/density hanya berdasarkan data aktual.
 - Jangan mengarang coverage untuk vendor yang belum punya `Cakupan Area` terstruktur atau route evidence.

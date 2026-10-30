@@ -65,8 +65,12 @@ Repo awal hanya berisi landing dan AGENTS.md. Salinan source lama di Downloads t
 
 ## Validasi
 
+Peta menyorot tujuan yang memiliki harga (approved/penawaran/counter/final), bukan asal rute. Bootstrap hanya mengirim indikator boolean kepada role komersial; nilai tetap khusus hasil pencarian pasangan rute. Referensi koordinat lama dipulihkan dengan alias kota eksplisit, termasuk Kediri. Kota dan kabupaten tidak digabung secara generik. Cakupan tertulis tanpa harga tidak menjadi highlight harga; Base/Branch tidak dianggap coverage. Saran lokasi dapat dicari dengan nama kota; lokasi referensi tidak membuat rute baru.
+
+Halaman masuk GPT Site: https://logistics-coverage-hub.warmsun2048.chatgpt.site. Halaman ini tidak menyimpan data vendor/harga dan membuka deployment Google yang sama. Akses operasional tetap memakai Gmail dan allowlist yang sama.
+
 ```sh
-node --test tests/backend.test.cjs tests/publisher.test.cjs
+node --test tests/backend.test.cjs tests/publisher.test.cjs tests/coverage.test.cjs
 ```
 
 Pengujian lokal memakai mock layanan Google. QA visual, otorisasi akun Gmail, izin spreadsheet, sinkronisasi publisher/trigger, dan UAT deployment tetap harus diperiksa di runtime asli. Paket source ini belum mengaktifkan sharing, trigger, deployment Google, atau custom domain.

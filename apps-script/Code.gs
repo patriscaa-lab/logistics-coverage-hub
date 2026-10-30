@@ -19,10 +19,18 @@ function authorize_() {
 }
 
 function getHubData() {
-  authorize_();
+  const email = authorize_();
   const hub = loadHub_();
+  const canViewRates = String(PropertiesService.getScriptProperties().getProperty('RATE_VIEWER_EMAILS') || '')
+    .split(',').map(x => x.trim().toLowerCase()).includes(email);
   // Bootstrap/peta tidak mengirim seluruh daftar harga ke browser.
-  hub.routes.forEach(r => { delete r.prices; });
+  hub.routes.forEach(r => {
+    if (canViewRates) {
+      r.hasPrice = (r.prices || []).some(p => [p.approved,p.offer,p.counter,p.final].some(x => typeof x === 'string' && x.trim() !== ''));
+      r.hasApprovedPrice = (r.prices || []).some(p => typeof p.approved === 'string' && p.approved.trim() !== '');
+    }
+    delete r.prices;
+  });
   return hub;
 }
 
