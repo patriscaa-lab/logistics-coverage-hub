@@ -221,4 +221,3 @@ Gunakan mockup LogiScope yang sudah dipilih user sebagai design direction utama.
 - Saat memodifikasi route data, pertahankan model origin + destination; jangan menyimpulkan route hanya dari destination.
 - Tampilkan kelemahan data quality secara eksplisit, jangan diam-diam mengisi kekosongan dengan asumsi.
 - Gunakan Bahasa Indonesia untuk komunikasi, penjelasan, dokumentasi internal, dan label UI sejauh tetap natural dan jelas.
-

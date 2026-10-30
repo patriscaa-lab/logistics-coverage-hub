@@ -23,6 +23,8 @@ function getHubData() {
   const hub = loadHub_();
   const canViewRates = String(PropertiesService.getScriptProperties().getProperty('RATE_VIEWER_EMAILS') || '')
     .split(',').map(x => x.trim().toLowerCase()).includes(email);
+  // Metadata respons saja; tidak menjadi bagian schema snapshot yang disimpan.
+  hub.canViewRates = canViewRates;
   // Bootstrap/peta tidak mengirim seluruh daftar harga ke browser.
   hub.routes.forEach(r => {
     if (canViewRates) {
@@ -130,7 +132,10 @@ function loadCentralHub_() {
   const routes = [];
   sourceRoutes.forEach(row => {
     const candidates = sourceIndex[row['Vendor ID']] || [];
-    const matched = candidates.length === 1 ? candidates[0] : candidates.find(v => v.name === normalize_(row['Vendor Name']));
+    const sourceName = normalize_(row['Vendor Name']);
+    const matched = candidates.length === 1 ?
+      (!sourceName || candidates[0].name === sourceName ? candidates[0] : null) :
+      candidates.find(v => v.name === sourceName);
     const vendor = matched ? byId[matched.id] : null;
     const approval = row['Approval Status'];
     const confirmation = row['Source Confirmation'];

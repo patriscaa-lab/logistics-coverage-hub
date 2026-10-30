@@ -55,4 +55,23 @@ function assertSafeSnapshot_(hub) {
     exactKeys(hub[key], keys);
     if (keys.some(k => !Number.isSafeInteger(hub[key][k]) || hub[key][k] < 0)) throw new Error('count');
   });
+  // Validasi relasi, bukan hanya bentuk JSON: harga tidak boleh terikat ke vendor/rute lain.
+  const vendorById = Object.create(null);
+  hub.vendors.forEach(v => {
+    if (!v.id.trim() || !v.name.trim() || vendorById[v.id]) throw new Error('vendor identity');
+    vendorById[v.id] = v;
+  });
+  const routeIds = new Set();
+  hub.routes.forEach(r => {
+    const vendor = vendorById[r.vendorId];
+    if (!r.id.trim() || routeIds.has(r.id) || !r.origin.trim() || !r.destination.trim() ||
+        !vendor || vendor.name !== r.vendorName || vendor.status !== 'Aktif' || vendor.group !== 'Ekspedisi / Transport') throw new Error('route identity');
+    routeIds.add(r.id);
+    if (r.prices.some(p => p.routeId !== r.id)) throw new Error('price identity');
+  });
+  const normalize = value => value.trim().replace(/\s+/g, ' ').toLowerCase();
+  if (hub.summary.vendors !== hub.vendors.length ||
+      hub.summary.activeTransport !== hub.vendors.filter(v => v.status === 'Aktif' && v.group === 'Ekspedisi / Transport').length ||
+      hub.summary.confirmedPairs !== new Set(hub.routes.map(r => normalize(r.origin) + '\u0000' + normalize(r.destination))).size ||
+      hub.summary.destinations !== new Set(hub.routes.map(r => normalize(r.destination))).size) throw new Error('summary consistency');
 }

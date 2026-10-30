@@ -465,4 +465,3 @@ LogiScope dianggap berhasil jika user tim Logistik mulai menggunakan kalimat sep
 > “Coba cek LogiScope.”
 
 Artinya LogiScope sudah menjadi tempat utama untuk mencari informasi dan mengambil keputusan awal terkait vendor, coverage, armada, dan planning pengiriman.
-

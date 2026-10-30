@@ -66,7 +66,7 @@ Instruksi terbaru pengguna mengaktifkan tampilan harga pada hasil pencarian bagi
 - Dua status terakhir adalah bukti quotation/negosiasi, bukan kesiapan pemesanan. Nilai ambigu, ID duplikat, atau rute tidak lengkap dihitung sebagai gap.
 - Hanya vendor transport Aktif masuk rekomendasi. Direktori tetap memuat vendor tanpa kontrak dan status lain.
 - Base/Branch dan coverage mentah tidak dipakai untuk mengarang pasangan rute. Coverage kosong tetap dinyatakan belum diisi.
-- Leaflet dimuat dari unpkg, tile dari OpenStreetMap. Referensi koordinat hanya menempatkan kota dari bukti rute. Kota yang tidak cocok persis dihitung belum terpetakan.
+- Leaflet dimuat dari unpkg. Geometri Indonesia dibundel dari Natural Earth tanpa request tile. Koordinat menempatkan kota dari bukti rute; lokasi yang tidak cocok dihitung belum terpetakan.
 - Jarak adalah haversine garis lurus antarpusat kota, bukan jarak jalan atau dasar tarif.
 
 Repo awal hanya berisi landing dan AGENTS.md. Salinan source lama di Downloads telah direview: pemeriksaan akses opsional ketika ALLOWED_DOMAIN kosong, pencarian belum menyaring status/kelompok vendor di server, dan banyak label UI kecil. Versi ini memperketat akses/proyeksi, menambah perbandingan, dan memakai body/table 14 px. Detail kontak belum ditampilkan.
@@ -78,7 +78,7 @@ Peta menyorot tujuan yang memiliki harga (approved/penawaran/counter/final), buk
 Halaman masuk GPT Site: https://logistics-coverage-hub.warmsun2048.chatgpt.site. Halaman ini tidak menyimpan data vendor/harga dan membuka deployment Google yang sama. Akses operasional tetap memakai Gmail dan allowlist yang sama.
 
 ```sh
-node --test tests/backend.test.cjs tests/publisher.test.cjs tests/coverage.test.cjs tests/logiscope.test.cjs
+node --test
 ```
 
 Pengujian lokal memakai mock layanan Google. QA visual, otorisasi akun Gmail, izin spreadsheet, sinkronisasi publisher/trigger, dan UAT deployment tetap harus diperiksa di runtime asli. Paket source ini belum mengaktifkan sharing, trigger, deployment Google, atau custom domain.
@@ -92,3 +92,7 @@ Load Planner awal menghitung dimensi cm ke m³, qty, berat kg opsional, dimensi 
 Keputusan runtime Gmail dari sesi sebelumnya dipertahankan: Central Master privat → publisher pemilik → proyeksi operasional → web berjalan sebagai pengguna. Refresh membaca hasil sinkronisasi terakhir; tidak menjalankan publisher. Harga approved tidak diubah. Halaman masuk GPT Site publik tanpa data, aplikasi tetap privat.
 
 Source pengembangan belum merupakan bukti pembaruan deployment Google. UAT visual dan rekomendasi armada masih pekerjaan berikutnya.
+
+## Audit dan remediasi repository
+
+Lihat [baseline terpatok](docs/BASELINE.md) dan [perubahan serta rekonsiliasi deployment](docs/REMEDIATION.md). Sumber PR bukan bukti bahwa deployment Google memakai kode yang sama. Metadata respons canViewRates membedakan akses harga yang dibatasi dari harga yang kosong; schema snapshot tersimpan tidak berubah.
