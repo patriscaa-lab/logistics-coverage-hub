@@ -1,5 +1,13 @@
 # LogiScope
 
+## Penyelarasan visual dan perbaikan peta
+
+Dashboard mengikuti referensi LogiScope: sidebar navy dengan submenu Compare Vendor, pencarian global, kartu KPI pastel, peta/statistik dua kolom, lima shortcut, lalu grafik vendor per tujuan, status komersial, dan kelengkapan data. Grafik menghitung vendor unik dari data aktual. Profil memakai label Tim Logistik, tanpa identitas contoh. Data kontak/legal yang belum diperiksa tidak diberi angka nol palsu.
+
+Peta tidak lagi meminta tile OpenStreetMap yang menghasilkan 403 saat pratinjau file lokal. Bentuk geografis Indonesia dibundel dari Natural Earth 1:50m (public domain), menggunakan geometri MultiPolygon asli dan penanda tujuan dari bukti rute. Referensi: https://github.com/nvkelso/natural-earth-vector/blob/master/geojson/ne_50m_admin_0_countries.geojson dan https://www.naturalearthdata.com/about/terms-of-use/. Batas geografis bukan bukti cakupan provinsi; warna/marker coverage berasal dari data tujuan. Leaflet tetap digunakan untuk zoom dan interaksi.
+
+Berkas `work/LogiScope-visual-preview.html` di luar repo adalah pratinjau lokal dengan data sintetis, bukan aplikasi operasional. Jangan menyalinnya ke Google Apps Script. Sumber pemasangan hanya `apps-script/Index.html`, yang tidak mengandung fixture atau snapshot vendor.
+
 Portal internal Logistik PT Prasetia Dwidharma. `AGENTS.md` dan `PROJECT_CONTEXT.md` adalah konteks utama proyek. Pengguna memakai Gmail biasa, tanpa Google Workspace.
 
 ## Arsitektur Gmail
