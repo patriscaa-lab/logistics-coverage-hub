@@ -164,13 +164,42 @@ Asuransi, Mobil Operasional, customer/self pickup, implementation partner, dan e
 - `Base / Branch` dan `Cakupan Area` harus dipisah, jangan digabung.
 - Jika `Cakupan Area` kosong, tampilkan `Belum diisi di Vendor Master`; jangan simpulkan bahwa vendor tidak punya coverage.
 
-## Arah visual
-User ingin tampilan seperti produk logistik internal yang matang dan profesional, bukan prototype polos.
-- Navigasi utama hanya di sidebar; jangan duplikasi menu yang sama di top bar.
-- Top bar hanya berisi branding LogiScope, search, dan utilitas/profile.
+## Arah visual final
+Gunakan mockup LogiScope yang sudah dipilih user sebagai design direction utama. Tampilan harus eye-catching, modern, tetapi tetap nyaman untuk penggunaan kerja harian.
+
+### Layout
+- Sidebar kiri berwarna navy gelap sebagai navigasi utama.
+- Jangan duplikasi menu sidebar di top bar.
+- Top bar hanya untuk branding, search, refresh, notifikasi/utilitas, dan profile.
+- Area konten utama menggunakan background sangat terang/putih dengan spacing lega.
+- Gunakan kartu putih dengan radius lembut, border/shadow tipis, dan hierarchy yang jelas.
+
+### Warna
+- Navy gelap sebagai warna brand/sidebar.
+- Biru terang sebagai primary action dan highlight data.
+- Teal/cyan sebagai secondary accent untuk insight, coverage, atau status positif.
+- Warna status harus konsisten: hijau untuk healthy/aktif, amber untuk warning/freeze/pending, merah untuk issue/tidak aktif, abu-abu untuk data kosong/unknown.
+- Hindari tampilan terlalu ramai atau terlalu banyak warna sekaligus.
+
+### Typography
+- Body/table sekitar 13–14 px desktop.
+- KPI angka harus besar dan mudah dipindai.
+- Judul section jelas dan lebih besar dari isi.
+- Kontras teks harus tinggi dan ramah mata.
+
+### Dashboard
 - KPI cards di bagian atas.
-- Map Indonesia besar sebagai hero visual jika konteks halaman memerlukan.
-- Hierarki visual kuat, spacing lega, typography mudah dibaca, palette biru/navy corporate.
+- Map Indonesia menjadi hero visual utama.
+- Gunakan chart/visual sederhana untuk status vendor, coverage, KHS/commercial readiness, atau data completeness.
+- Sediakan quick action card untuk Compare Vendor, Coverage Map, Load Planner, Armada Guide, dan Data Health.
+- Fokus pada informasi yang bisa dipahami user dalam 2–3 detik.
+
+### Interaksi
+- Hover dan selected states harus jelas.
+- Filter harus mudah dipahami dan tidak tersembunyi.
+- Empty state harus informatif, bukan layar kosong.
+- Loading state harus terasa rapi dan tidak membuat layout meloncat.
+- Responsif untuk laptop kantor; desktop adalah prioritas utama.
 
 ## Ekspektasi implementasi Google Apps Script
 - `Code.gs` membaca Central Master di server-side.
