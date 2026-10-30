@@ -1,5 +1,12 @@
 # LogiScope — Handoff untuk Codex
 
+## Cara membaca konteks proyek
+Sebelum mulai mengubah kode:
+1. Baca file ini (`AGENTS.md`) sebagai aturan kerja utama.
+2. Baca `PROJECT_CONTEXT.md` sebagai memori proyek dan sumber konteks produk yang lebih lengkap.
+3. Jika ada konflik, aturan keamanan dan instruksi terbaru di `AGENTS.md` lebih diprioritaskan.
+4. Jangan menaruh data sensitif operasional ke repository publik hanya untuk memudahkan development.
+
 ## Tujuan
 Bangun dan pelihara **LogiScope**, aplikasi internal untuk tim Logistik PT Prasetia Dwidharma. Aplikasi ini ditujukan untuk penggunaan operasional harian, bukan sebagai demo publik.
 
