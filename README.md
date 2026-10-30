@@ -1,6 +1,6 @@
-# Logistics Coverage Hub
+# LogiScope
 
-Portal internal Logistik PT Prasetia Dwidharma. `AGENTS.md` adalah konteks utama proyek. Pengguna memakai Gmail biasa, tanpa Google Workspace.
+Portal internal Logistik PT Prasetia Dwidharma. `AGENTS.md` dan `PROJECT_CONTEXT.md` adalah konteks utama proyek. Pengguna memakai Gmail biasa, tanpa Google Workspace.
 
 ## Arsitektur Gmail
 
@@ -70,7 +70,17 @@ Peta menyorot tujuan yang memiliki harga (approved/penawaran/counter/final), buk
 Halaman masuk GPT Site: https://logistics-coverage-hub.warmsun2048.chatgpt.site. Halaman ini tidak menyimpan data vendor/harga dan membuka deployment Google yang sama. Akses operasional tetap memakai Gmail dan allowlist yang sama.
 
 ```sh
-node --test tests/backend.test.cjs tests/publisher.test.cjs tests/coverage.test.cjs
+node --test tests/backend.test.cjs tests/publisher.test.cjs tests/coverage.test.cjs tests/logiscope.test.cjs
 ```
 
 Pengujian lokal memakai mock layanan Google. QA visual, otorisasi akun Gmail, izin spreadsheet, sinkronisasi publisher/trigger, dan UAT deployment tetap harus diperiksa di runtime asli. Paket source ini belum mengaktifkan sharing, trigger, deployment Google, atau custom domain.
+
+## Pengembangan LogiScope — 30 Oktober 2026
+
+Konteks terbaru dari main diikuti: branding LogiScope, enam modul sidebar, direktori di dalam Compare Vendor, dan peta yang sama pada Dashboard/Coverage Map. Dashboard merangkum status seluruh vendor dan kesiapan komersial transport. Risiko satu vendor dideduplikasi per tujuan lintas asal/armada; ini bukan jaminan ketersediaan setiap pasangan rute. Perbandingan menampilkan harga hanya dari hasil RPC berizin.
+
+Load Planner awal menghitung dimensi cm ke m³, qty, berat kg opsional, dimensi terpanjang, dan luas tapak tanpa stacking. Berat kosong tetap tidak diketahui. Belum ada rekomendasi kendaraan karena master Armada Guide belum tervalidasi; input stacking bukan bukti barang aman ditumpuk. Data Health menambah lead time belum lengkap dan quotation tanpa approval; kontak/legal/armada yang belum diproyeksikan ditandai belum diperiksa.
+
+Keputusan runtime Gmail dari sesi sebelumnya dipertahankan: Central Master privat → publisher pemilik → proyeksi operasional → web berjalan sebagai pengguna. Refresh membaca hasil sinkronisasi terakhir; tidak menjalankan publisher. Harga approved tidak diubah. Halaman masuk GPT Site publik tanpa data, aplikasi tetap privat.
+
+Source pengembangan belum merupakan bukti pembaruan deployment Google. UAT visual dan rekomendasi armada masih pekerjaan berikutnya.

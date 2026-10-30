@@ -1,8 +1,8 @@
-/** Logistics Coverage Hub. Seluruh helper privat berakhiran _. Tidak ada operasi tulis Sheet. */
+/** LogiScope. Seluruh helper privat berakhiran _. Tidak ada operasi tulis Sheet. */
 function doGet() {
   try {
     authorize_();
-    return HtmlService.createHtmlOutputFromFile('Index').setTitle('Logistics Coverage Hub')
+    return HtmlService.createHtmlOutputFromFile('Index').setTitle('LogiScope')
       .addMetaTag('viewport', 'width=device-width, initial-scale=1');
   } catch (e) {
     return HtmlService.createHtmlOutput('<h1>Akses dibatasi</h1><p>Gunakan akun tim Logistik yang telah diizinkan administrator.</p>');
