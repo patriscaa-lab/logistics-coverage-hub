@@ -1,14 +1,108 @@
-# Logistics Coverage Hub — Handoff untuk Codex
+# LogiScope — Handoff untuk Codex
 
 ## Tujuan
-Bangun dan pelihara Logistics Coverage Hub internal untuk tim Logistik PT Prasetia Dwidharma. Aplikasi ini ditujukan untuk penggunaan operasional harian, bukan sebagai demo publik.
+Bangun dan pelihara **LogiScope**, aplikasi internal untuk tim Logistik PT Prasetia Dwidharma. Aplikasi ini ditujukan untuk penggunaan operasional harian, bukan sebagai demo publik.
+
+## Branding final
+- Nama produk: **LogiScope**.
+- Jangan gunakan nama `Logistics Coverage Hub` sebagai nama utama di UI final; nama tersebut hanya boleh muncul sebagai deskripsi jika diperlukan.
+- Gunakan nama **LogiScope** pada header, title browser, dokumentasi produk, dan materi internal.
+- URL yang dilihat user tidak boleh membawa nama personal user atau branding GitHub.
+- URL final yang diinginkan: custom domain/subdomain yang rapi seperti `logistics.prasetia.co.id` atau domain perusahaan lain yang tersedia.
+
+## Modul utama LogiScope
+Menu utama final:
+1. **Dashboard**
+2. **Compare Vendor**
+3. **Coverage Map**
+4. **Load Planner**
+5. **Armada Guide**
+6. **Data Health**
+
+Fungsi pencarian route, vendor detail, dan vendor directory tetap penting, tetapi tidak harus menjadi menu utama tersendiri. Fitur tersebut boleh ditempatkan di dalam Dashboard, Compare Vendor, atau halaman pendukung yang paling natural.
+
+## Definisi tiap modul
+### Dashboard
+- Ringkasan vendor aktif, freeze, belum pernah kerja sama, tidak aktif.
+- Ringkasan kota/area coverage.
+- Single-vendor risk.
+- KHS/commercial readiness.
+- Shortcut pencarian origin → destination.
+- Insight cepat kondisi data logistics.
+
+### Compare Vendor
+Untuk route seperti `Jakarta → Surabaya`, tampilkan vendor yang punya bukti route terkonfirmasi dan bandingkan:
+- Nama vendor.
+- Mode/service.
+- Vehicle/armada.
+- Lead time.
+- Status kesiapan komersial.
+- Estimasi jarak.
+- Harga hanya jika user secara eksplisit meminta role-based internal view.
+
+Jangan menyimpulkan vendor tidak melayani hanya karena tidak punya KHS/harga.
+
+### Coverage Map
+- Gunakan peta geografis Indonesia sungguhan.
+- Visualisasikan coverage berdasarkan data aktual.
+- Tampilkan gap coverage, single-vendor city, dan area dengan banyak vendor.
+- Jangan mengarang coverage jika `Cakupan Area`/route evidence kosong.
+- Origin dan destination aktif harus terlihat berbeda.
+- Tampilkan garis route dan estimasi km jika memungkinkan.
+
+### Load Planner
+Modul untuk membantu planning muatan berdasarkan dimensi barang dan qty.
+
+Input minimal:
+- Nama/material.
+- Panjang × lebar × tinggi per unit.
+- Qty.
+- Berat per unit jika tersedia.
+- Opsi stacking bila relevan.
+
+Hitung:
+- Volume per unit (m³).
+- Volume total (m³).
+- Berat total.
+- Dimensi terpanjang.
+
+Output:
+- Rekomendasi jenis armada berdasarkan volume, payload, dan dimensi bak.
+- Warning jika barang terlalu panjang/tinggi/lebar untuk armada tertentu.
+- Jangan hanya memakai volume; cek juga payload dan batas dimensi fisik.
+- Rekomendasi harus diposisikan sebagai alat bantu planning, bukan jaminan muat tanpa pengecekan lapangan.
+
+### Armada Guide
+Knowledge base armada untuk edukasi tim.
+
+Tampilkan minimal:
+- Jenis armada.
+- Panjang × lebar × tinggi bak.
+- Volume teoritis.
+- Payload maksimum/umum.
+- Jenis bak: bak terbuka, box, wingbox, container, dll.
+- Contoh barang yang cocok.
+- Keterbatasan/catatan loading.
+- Ilustrasi sederhana jika tersedia.
+
+Armada Guide harus bisa dipakai Load Planner sebagai master referensi.
+
+### Data Health
+Tampilkan gap data secara eksplisit, misalnya:
+- Cakupan Area kosong.
+- Lead time kosong.
+- Vendor belum punya PIC/contact.
+- Legal entity mismatch.
+- Quotation tanpa approval.
+- Vendor route ada tetapi commercial status belum jelas.
+- Data armada belum lengkap.
+
+Tujuan Data Health adalah membantu Supervisor Logistik memperbaiki master data, bukan menyembunyikan kekurangan data.
 
 ## Keputusan arsitektur saat ini
 - Aplikasi production: Google Apps Script Web App.
 - Sumber data utama: Google Sheet `Logistics Coverage Hub - Central Master`.
 - GitHub Pages bukan aplikasi production dan tidak boleh menjadi URL operasional yang dilihat user.
-- URL yang dilihat user tidak boleh membawa nama personal user atau branding GitHub.
-- URL final yang diinginkan: custom domain/subdomain yang rapi seperti `logistics.prasetia.co.id` atau domain perusahaan lain yang tersedia.
 - Google Apps Script tetap menjadi runtime backend/frontend sampai ada keputusan baru yang eksplisit.
 
 ## Struktur data / sheet sumber
@@ -28,26 +122,6 @@ Jangan mengubah harga approved kecuali diminta secara eksplisit. Pertahankan nil
 - PIC/contact detail bersifat internal-only.
 - Production harus dibatasi ke tim Logistik seketat mungkin sesuai konfigurasi akun Google/Workspace yang tersedia.
 
-## Fungsi utama produk
-1. Map coverage Indonesia interaktif.
-2. Search route: Origin → Destination.
-3. Compare vendor.
-4. Vendor detail.
-5. Vendor directory/master data view.
-6. Coverage gap insight / dashboard.
-7. Estimasi jarak dalam km untuk route yang dipilih.
-
-## Perilaku hasil pencarian route
-Untuk route seperti `Jakarta → Surabaya`, tampilkan vendor yang punya bukti route terkonfirmasi dan tampilkan:
-- Nama vendor.
-- Mode/service.
-- Vehicle/armada.
-- Lead time.
-- Status kesiapan komersial.
-- Estimasi jarak.
-
-Jangan tampilkan harga secara default.
-
 ## Capability vendor vs status komersial
 Jangan mewajibkan vendor punya KHS atau harga supaya muncul di Vendor Directory.
 
@@ -65,8 +139,6 @@ Label komersial yang disukai:
 Hindari label UI `Not Approved` jika bisa diganti dengan istilah operasional yang lebih jelas.
 
 ## Pengelompokan dan status vendor
-Default Vendor List fokus ke `Ekspedisi / Transport`.
-
 Filter Kelompok:
 - Ekspedisi / Transport
 - Asuransi & Support
@@ -88,43 +160,17 @@ Asuransi, Mobil Operasional, customer/self pickup, implementation partner, dan e
 - Font harus nyaman dibaca; hindari body text 7–9 px.
 - Target body/table text sekitar 13–14 px pada desktop.
 - Header tabel harus punya baris sendiri dan sticky di bagian atas container tabel.
-- Kolom yang direkomendasikan:
-  - Vendor
-  - Status
-  - Kelompok
-  - Layanan
-  - Base / Branch
-  - Cakupan Area
-  - KHS
-  - Aksi
+- Kolom yang direkomendasikan: Vendor, Status, Kelompok, Layanan, Base / Branch, Cakupan Area, KHS, Aksi.
 - `Base / Branch` dan `Cakupan Area` harus dipisah, jangan digabung.
 - Jika `Cakupan Area` kosong, tampilkan `Belum diisi di Vendor Master`; jangan simpulkan bahwa vendor tidak punya coverage.
 
 ## Arah visual
 User ingin tampilan seperti produk logistik internal yang matang dan profesional, bukan prototype polos.
-
-Home/dashboard harus terasa seperti portal logistik profesional:
 - Navigasi utama hanya di sidebar; jangan duplikasi menu yang sama di top bar.
-- Top bar hanya berisi branding, search, dan utilitas/profile.
+- Top bar hanya berisi branding LogiScope, search, dan utilitas/profile.
 - KPI cards di bagian atas.
-- Map Indonesia besar sebagai hero visual.
-- Coverage density divisualisasikan dengan warna/marker.
-- Route search panel.
-- Vendor result cards/list.
-- City detail / coverage insight panel.
+- Map Indonesia besar sebagai hero visual jika konteks halaman memerlukan.
 - Hierarki visual kuat, spacing lega, typography mudah dibaca, palette biru/navy corporate.
-
-## Perilaku map
-- Gunakan peta geografis sungguhan, bukan bentuk pulau schematic.
-- Tampilkan marker/density hanya berdasarkan data aktual.
-- Jangan mengarang coverage untuk vendor yang belum punya `Cakupan Area` terstruktur atau route evidence.
-- Origin dan destination aktif harus terlihat berbeda.
-- Tampilkan garis route dan estimasi km jika memungkinkan.
-
-## Realitas data quality saat ini
-Tidak semua Vendor Master punya structured coverage yang lengkap. UI harus menampilkan gap data ini secara jujur, bukan mengisinya dengan tebakan.
-
-Confirmed route evidence baru tersedia untuk sebagian vendor; Vendor Directory tetap harus menampilkan vendor non-contract/non-KHS berdasarkan capability/status.
 
 ## Ekspektasi implementasi Google Apps Script
 - `Code.gs` membaca Central Master di server-side.
@@ -132,11 +178,6 @@ Confirmed route evidence baru tersedia untuk sebagian vendor; Vendor Directory t
 - Sediakan tombol `Refresh Data` agar perubahan di Central Master bisa dibaca ulang tanpa membuat snapshot static baru.
 - Hindari mengirim field rate ke JavaScript browser.
 - Jika memungkinkan, lakukan filter/aggregation data sensitif di server-side.
-
-## Branding / penamaan
-Gunakan nama produk `Logistics Coverage Hub`.
-Jangan gunakan username GitHub personal user dalam branding operasional atau URL final yang dilihat user.
-Jangan jadikan GitHub Pages sebagai solusi production.
 
 ## Cara kerja
 - Lakukan perubahan secara incremental dan mudah diuji.
