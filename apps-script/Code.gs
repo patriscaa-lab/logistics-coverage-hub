@@ -2,7 +2,7 @@
 function doGet() {
   try {
     authorize_();
-    return HtmlService.createHtmlOutput(HtmlService.createHtmlOutputFromFile('Index').getContent() + HtmlService.createHtmlOutputFromFile('MapTools').getContent()).setTitle('LogiScope')
+    return HtmlService.createHtmlOutput(HtmlService.createHtmlOutputFromFile('Index').getContent() + HtmlService.createHtmlOutputFromFile('MapTools').getContent() + HtmlService.createHtmlOutputFromFile('Geography').getContent() + HtmlService.createHtmlOutputFromFile('CoverageUX').getContent()).setTitle('LogiScope')
       .addMetaTag('viewport', 'width=device-width, initial-scale=1');
   } catch (e) {
     return HtmlService.createHtmlOutput('<h1>Akses dibatasi</h1><p>Gunakan akun tim Logistik yang telah diizinkan administrator.</p>');

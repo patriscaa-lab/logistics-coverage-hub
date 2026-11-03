@@ -1,14 +1,16 @@
 # LogiScope
 
+Audit UX terbaru: [UX_REMEDIATION.md](docs/UX_REMEDIATION.md). Dashboard menggunakan Coverage Snapshot terpisah dengan CTA; Coverage Map menangani eksplorasi wilayah dan Ukur Jarak yang dapat dibuka saat diperlukan. Copy redundant dibuang, statistik layanan dipadatkan, dan identitas akun tetap terlihat pada laptop. Perubahan UX ini belum dipasang ke deployment live; batas rekonsiliasi source dijelaskan pada laporan tersebut.
+
 Pemeriksaan akses, normalisasi titik Gmail pribadi, label kota/kabupaten, dan pengukuran dua titik peta dijelaskan di [ACCESS_MAP_FIX.md](docs/ACCESS_MAP_FIX.md). Modul web tambahan: `Identity.gs`, `MapTools.gs`, dan `MapTools.html`. Status akses akun kedua harus dikonfirmasi dari akun tersebut; jangan menyatakan selesai hanya berdasarkan pengujian pemilik.
 
 ## Penyelarasan visual dan perbaikan peta
 
-Dashboard mengikuti referensi LogiScope: sidebar navy dengan submenu Compare Vendor, pencarian global, kartu KPI pastel, peta/statistik dua kolom, lima shortcut, lalu grafik vendor per tujuan, status komersial, dan kelengkapan data. Grafik menghitung vendor unik dari data aktual. Profil memakai label Tim Logistik, tanpa identitas contoh. Data kontak/legal yang belum diperiksa tidak diberi angka nol palsu.
+Dashboard memakai sidebar navy, pencarian global, KPI, Coverage Snapshot, strip statistik layanan, shortcut, serta ringkasan vendor/komersial/kualitas data. Grafik menghitung vendor unik dari data aktual. Identitas workspace Tim Logistik tidak memiliki dropdown palsu. Data kontak/legal yang belum diperiksa tidak diberi angka nol palsu.
 
 Peta tidak lagi meminta tile OpenStreetMap yang menghasilkan 403 saat pratinjau file lokal. Bentuk geografis Indonesia dibundel dari Natural Earth 1:50m (public domain), menggunakan geometri MultiPolygon asli dan penanda tujuan dari bukti rute. Referensi: https://github.com/nvkelso/natural-earth-vector/blob/master/geojson/ne_50m_admin_0_countries.geojson dan https://www.naturalearthdata.com/about/terms-of-use/. Batas geografis bukan bukti cakupan provinsi; warna/marker coverage berasal dari data tujuan. Leaflet tetap digunakan untuk zoom dan interaksi.
 
-Berkas `work/LogiScope-visual-preview.html` di luar repo adalah pratinjau lokal dengan data sintetis, bukan aplikasi operasional. Jangan menyalinnya ke Google Apps Script. Sumber pemasangan hanya `apps-script/Index.html`, yang tidak mengandung fixture atau snapshot vendor.
+Berkas pratinjau QA menggunakan data sintetis dan bukan aplikasi operasional. Jangan menyalinnya ke Google Apps Script. Source lengkap web berada di `apps-script/`: selain Code/Snapshot/Identity/MapTools, output HTML kini memakai `Index.html`, `MapTools.html`, `Geography.html`, dan `CoverageUX.html`. Konfigurasi privat dan source runtime yang berbeda harus direkonsiliasi sebelum pemasangan; lihat laporan audit.
 
 Portal internal Logistik PT Prasetia Dwidharma. `AGENTS.md` dan `PROJECT_CONTEXT.md` adalah konteks utama proyek. Pengguna memakai Gmail biasa, tanpa Google Workspace.
 
