@@ -1,5 +1,7 @@
 # LogiScope
 
+Pemeriksaan akses, normalisasi titik Gmail pribadi, label kota/kabupaten, dan pengukuran dua titik peta dijelaskan di [ACCESS_MAP_FIX.md](docs/ACCESS_MAP_FIX.md). Modul web tambahan: `Identity.gs`, `MapTools.gs`, dan `MapTools.html`. Status akses akun kedua harus dikonfirmasi dari akun tersebut; jangan menyatakan selesai hanya berdasarkan pengujian pemilik.
+
 ## Penyelarasan visual dan perbaikan peta
 
 Dashboard mengikuti referensi LogiScope: sidebar navy dengan submenu Compare Vendor, pencarian global, kartu KPI pastel, peta/statistik dua kolom, lima shortcut, lalu grafik vendor per tujuan, status komersial, dan kelengkapan data. Grafik menghitung vendor unik dari data aktual. Profil memakai label Tim Logistik, tanpa identitas contoh. Data kontak/legal yang belum diperiksa tidak diberi angka nol palsu.

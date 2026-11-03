@@ -2,7 +2,7 @@
 function doGet() {
   try {
     authorize_();
-    return HtmlService.createHtmlOutputFromFile('Index').setTitle('LogiScope')
+    return HtmlService.createHtmlOutput(HtmlService.createHtmlOutputFromFile('Index').getContent() + HtmlService.createHtmlOutputFromFile('MapTools').getContent()).setTitle('LogiScope')
       .addMetaTag('viewport', 'width=device-width, initial-scale=1');
   } catch (e) {
     return HtmlService.createHtmlOutput('<h1>Akses dibatasi</h1><p>Gunakan akun tim Logistik yang telah diizinkan administrator.</p>');
@@ -11,8 +11,8 @@ function doGet() {
 
 function authorize_() {
   const p = PropertiesService.getScriptProperties();
-  const email = String(Session.getActiveUser().getEmail() || '').trim().toLowerCase();
-  const allowed = String(p.getProperty('ALLOWED_EMAILS') || '').split(',').map(x => x.trim().toLowerCase()).filter(Boolean);
+  const email = canonicalAccount_(Session.getActiveUser().getEmail());
+  const allowed = String(p.getProperty('ALLOWED_EMAILS') || '').split(',').map(canonicalAccount_).filter(Boolean);
   // Jangan fallback ke effective user: pada execute-as-owner itu adalah identitas pemilik.
   if (!email || allowed.indexOf(email) < 0) throw new Error('Akses ditolak. Hubungi administrator Logistik.');
   return email;
@@ -22,7 +22,7 @@ function getHubData() {
   const email = authorize_();
   const hub = loadHub_();
   const canViewRates = String(PropertiesService.getScriptProperties().getProperty('RATE_VIEWER_EMAILS') || '')
-    .split(',').map(x => x.trim().toLowerCase()).includes(email);
+    .split(',').map(canonicalAccount_).includes(email);
   // Metadata respons saja; tidak menjadi bagian schema snapshot yang disimpan.
   hub.canViewRates = canViewRates;
   // Bootstrap/peta tidak mengirim seluruh daftar harga ke browser.
@@ -39,7 +39,7 @@ function getHubData() {
 function searchRoutes(query) {
   const email = authorize_();
   const rateViewers = String(PropertiesService.getScriptProperties().getProperty('RATE_VIEWER_EMAILS') || '')
-    .split(',').map(x => x.trim().toLowerCase()).filter(Boolean);
+    .split(',').map(canonicalAccount_).filter(Boolean);
   const canViewRates = rateViewers.indexOf(email) >= 0;
   if (!query || typeof query.origin !== 'string' || typeof query.destination !== 'string' ||
       !query.origin.trim() || !query.destination.trim() || query.origin.length > 200 || query.destination.length > 200) {
