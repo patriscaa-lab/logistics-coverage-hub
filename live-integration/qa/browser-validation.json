@@ -1,0 +1,29 @@
+{
+  "result": "passed",
+  "widths": [
+    1440,
+    1280,
+    1024
+  ],
+  "synthetic": true,
+  "errors": [],
+  "checks": [
+    "delapan modul",
+    "approved rate string persis",
+    "perbandingan vendor",
+    "directory Freeze + empty",
+    "Load Planner volume/berat",
+    "Armada belum tervalidasi",
+    "Data Health",
+    "road tidak tersedia",
+    "snapshot terpisah",
+    "account laptop",
+    "hasil + empty search",
+    "lokasi kota + provinsi",
+    "detail setelah selection",
+    "filter",
+    "ruler",
+    "empty data",
+    "tanpa overflow"
+  ]
+}
