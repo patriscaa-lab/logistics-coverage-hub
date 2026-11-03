@@ -4,8 +4,29 @@
 Sebelum mulai mengubah kode:
 1. Baca file ini (`AGENTS.md`) sebagai aturan kerja utama.
 2. Baca `PROJECT_CONTEXT.md` sebagai memori proyek dan sumber konteks produk yang lebih lengkap.
-3. Jika ada konflik, aturan keamanan dan instruksi terbaru di `AGENTS.md` lebih diprioritaskan.
-4. Jangan menaruh data sensitif operasional ke repository publik hanya untuk memudahkan development.
+3. Baca `UX_PRODUCT_RULES.md` sebagai panduan cara mengambil keputusan UI/UX dan product judgment.
+4. Jika ada `MASTER_GOVERNANCE.md`, baca dan gunakan sebagai governance reference utama untuk keputusan engineering yang substantif.
+5. Jika ada konflik, prioritaskan: keamanan & integritas data → instruksi terbaru di `AGENTS.md` → governance → konteks produk → UX rules.
+6. Jangan menaruh data sensitif operasional ke repository publik hanya untuk memudahkan development.
+
+## Cara berpikir sebelum coding
+Codex tidak boleh langsung menambah elemen hanya karena requirement menyebut sebuah informasi.
+
+Sebelum implementasi:
+- inspeksi implementasi saat ini;
+- identifikasi pekerjaan utama user pada halaman tersebut;
+- identifikasi informasi yang benar-benar diperlukan untuk pekerjaan itu;
+- hapus/mindahkan elemen yang redundant sebelum menambah elemen baru;
+- pisahkan informasi primer, supporting detail, dan audit/technical detail;
+- pilih solusi paling sederhana yang memenuhi kebutuhan;
+- jangan mengganti stack/library jika masalah bisa diselesaikan lewat layout, styling, konfigurasi, atau data flow yang ada.
+
+Prinsip default:
+- **Remove before add**.
+- **Progressive disclosure**.
+- **One screen, one dominant job**.
+- **Operational usefulness lebih penting daripada dekorasi**.
+- **Clarity lebih penting daripada novelty**.
 
 ## Tujuan
 Bangun dan pelihara **LogiScope**, aplikasi internal untuk tim Logistik PT Prasetia Dwidharma. Aplikasi ini ditujukan untuk penggunaan operasional harian, bukan sebagai demo publik.
@@ -36,6 +57,7 @@ Fungsi pencarian route, vendor detail, dan vendor directory tetap penting, tetap
 - KHS/commercial readiness.
 - Shortcut pencarian origin → destination.
 - Insight cepat kondisi data logistics.
+- Dashboard adalah overview; jangan menduplikasi seluruh fungsi Coverage Map atau Compare Vendor.
 
 ### Compare Vendor
 Untuk route seperti `Jakarta → Surabaya`, tampilkan vendor yang punya bukti route terkonfirmasi dan bandingkan:
@@ -50,12 +72,28 @@ Untuk route seperti `Jakarta → Surabaya`, tampilkan vendor yang punya bukti ro
 Jangan menyimpulkan vendor tidak melayani hanya karena tidak punya KHS/harga.
 
 ### Coverage Map
+Coverage Map adalah **exploration tool geografis** dan harus berfokus pada pertanyaan:
+> “Daerah mana yang sudah punya vendor, seberapa kuat coverage-nya, dan siapa vendornya ketika wilayah dipilih?”
+
+Aturan utama:
 - Gunakan peta geografis Indonesia sungguhan.
+- Map harus menjadi elemen dominan halaman, bukan dikelilingi banyak card dan paragraf.
 - Visualisasikan coverage berdasarkan data aktual.
 - Tampilkan gap coverage, single-vendor city, dan area dengan banyak vendor.
 - Jangan mengarang coverage jika `Cakupan Area`/route evidence kosong.
-- Origin dan destination aktif harus terlihat berbeda.
-- Tampilkan garis route dan estimasi km jika memungkinkan.
+- Gunakan progressive zoom: pada zoom nasional jangan paksa semua kota/kabupaten tampil sekaligus.
+- Label geografis harus tetap terbaca pada zoom yang sesuai.
+- Coverage overlay tidak boleh menutup seluruh context geografis/basemap.
+- Marker banyak harus menggunakan clustering atau mekanisme decluttering.
+- Nama vendor tidak boleh menjadi permanent label memenuhi peta.
+- Search kota/kabupaten/provinsi harus mem-focus map ke lokasi terpilih.
+- Klik wilayah membuka detail panel ringkas; panel tidak perlu tampil permanen sebelum ada selection.
+- Legend harus compact.
+- Origin/destination route line hanya tampil ketika memang relevan; jangan membuat Coverage Map berubah menjadi Route Search.
+- CTA boleh membawa user ke Vendor Directory/Compare Vendor dengan konteks wilayah yang sudah dipilih.
+- Jangan tampilkan koordinat, source row, atau technical metadata di map utama.
+
+Detail UX Coverage Map wajib mengikuti `UX_PRODUCT_RULES.md`.
 
 ### Load Planner
 Modul untuk membantu planning muatan berdasarkan dimensi barang dan qty.
@@ -105,6 +143,8 @@ Tampilkan gap data secara eksplisit, misalnya:
 - Data armada belum lengkap.
 
 Tujuan Data Health adalah membantu Supervisor Logistik memperbaiki master data, bukan menyembunyikan kekurangan data.
+
+Technical/audit detail sebaiknya diarahkan ke Data Health, bukan memenuhi halaman operasional lain.
 
 ## Keputusan arsitektur saat ini
 - Aplikasi production: Google Apps Script Web App.
@@ -180,6 +220,7 @@ Gunakan mockup LogiScope yang sudah dipilih user sebagai design direction utama.
 - Top bar hanya untuk branding, search, refresh, notifikasi/utilitas, dan profile.
 - Area konten utama menggunakan background sangat terang/putih dengan spacing lega.
 - Gunakan kartu putih dengan radius lembut, border/shadow tipis, dan hierarchy yang jelas.
+- Halaman task-oriented tidak harus memakai banyak card; card bukan default solution.
 
 ### Warna
 - Navy gelap sebagai warna brand/sidebar.
@@ -196,7 +237,7 @@ Gunakan mockup LogiScope yang sudah dipilih user sebagai design direction utama.
 
 ### Dashboard
 - KPI cards di bagian atas.
-- Map Indonesia menjadi hero visual utama.
+- Map Indonesia dapat menjadi hero visual untuk overview, tetapi jangan menduplikasi full Coverage Map.
 - Gunakan chart/visual sederhana untuk status vendor, coverage, KHS/commercial readiness, atau data completeness.
 - Sediakan quick action card untuk Compare Vendor, Coverage Map, Load Planner, Armada Guide, dan Data Health.
 - Fokus pada informasi yang bisa dipahami user dalam 2–3 detik.
@@ -207,6 +248,7 @@ Gunakan mockup LogiScope yang sudah dipilih user sebagai design direction utama.
 - Empty state harus informatif, bukan layar kosong.
 - Loading state harus terasa rapi dan tidak membuat layout meloncat.
 - Responsif untuk laptop kantor; desktop adalah prioritas utama.
+- Detail sekunder muncul setelah user melakukan selection, bukan memenuhi layar sejak awal.
 
 ## Ekspektasi implementasi Google Apps Script
 - `Code.gs` membaca Central Master di server-side.
@@ -217,7 +259,23 @@ Gunakan mockup LogiScope yang sudah dipilih user sebagai design direction utama.
 
 ## Cara kerja
 - Lakukan perubahan secara incremental dan mudah diuji.
+- Inspect before modifying.
+- Preserve correct existing behavior.
 - Jangan pernah mengubah approved price saat migrasi UI/data.
 - Saat memodifikasi route data, pertahankan model origin + destination; jangan menyimpulkan route hanya dari destination.
 - Tampilkan kelemahan data quality secara eksplisit, jangan diam-diam mengisi kekosongan dengan asumsi.
 - Gunakan Bahasa Indonesia untuk komunikasi, penjelasan, dokumentasi internal, dan label UI sejauh tetap natural dan jelas.
+- Jika requirement UI ambigu, gunakan urutan prioritas: data integrity & security → tujuan operasional → simplicity → readability → consistency → visual polish → novelty.
+
+## Definition of done untuk perubahan UI besar
+Sebelum menyatakan pekerjaan selesai, pastikan:
+- user tahu primary action halaman dalam 3 detik;
+- tidak ada informasi redundant tanpa alasan;
+- technical metadata tidak mendominasi;
+- body text nyaman dibaca;
+- tidak ada placeholder data yang terlihat seperti data aktual;
+- data kosong tidak ditebak;
+- approved rate tidak berubah;
+- dependency/library baru hanya ditambahkan jika benar-benar diperlukan;
+- halaman tetap nyaman dipakai pada laptop kantor;
+- acceptance criteria terkait halaman di `UX_PRODUCT_RULES.md` sudah diperiksa.
