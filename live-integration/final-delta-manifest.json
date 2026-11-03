@@ -1,0 +1,162 @@
+{
+  "baselineVersion": 8,
+  "edits": [
+    {
+      "file": "Code.gs",
+      "count": 1
+    },
+    {
+      "file": "Index.html",
+      "count": 1
+    },
+    {
+      "file": "Index.html",
+      "count": 1
+    },
+    {
+      "file": "Index.html",
+      "count": 1
+    },
+    {
+      "file": "Index.html",
+      "count": 1
+    },
+    {
+      "file": "Index.html",
+      "count": 1
+    },
+    {
+      "file": "Index.html",
+      "count": 1
+    },
+    {
+      "file": "Index.html",
+      "count": 1
+    },
+    {
+      "file": "Index.html",
+      "count": 1
+    },
+    {
+      "file": "Index.html",
+      "count": 1
+    },
+    {
+      "file": "Index.html",
+      "count": 1
+    },
+    {
+      "file": "Index.html",
+      "count": 1
+    },
+    {
+      "file": "Index.html",
+      "count": 1
+    },
+    {
+      "file": "Index.html",
+      "count": 1
+    },
+    {
+      "file": "Index.html",
+      "count": 1
+    },
+    {
+      "file": "Index.html",
+      "count": 1
+    },
+    {
+      "file": "Index.html",
+      "count": 1
+    },
+    {
+      "file": "Index.html",
+      "count": 1
+    },
+    {
+      "file": "Index.html",
+      "count": 1
+    },
+    {
+      "file": "MapTools.html",
+      "count": 1
+    },
+    {
+      "file": "MapTools.html",
+      "count": 1
+    },
+    {
+      "file": "MapTools.html",
+      "count": 1
+    },
+    {
+      "file": "MapTools.html",
+      "count": 1
+    },
+    {
+      "file": "MapTools.html",
+      "count": 1
+    },
+    {
+      "file": "MapTools.html",
+      "count": 1
+    },
+    {
+      "file": "MapTools.html",
+      "count": 1
+    },
+    {
+      "file": "MapTools.html",
+      "count": 1
+    },
+    {
+      "file": "MapTools.html",
+      "count": 1
+    },
+    {
+      "file": "MapTools.html",
+      "count": 1
+    },
+    {
+      "file": "MapTools.html",
+      "count": 1
+    },
+    {
+      "file": "MapTools.html",
+      "count": 1
+    },
+    {
+      "file": "MapTools.html",
+      "count": 1
+    },
+    {
+      "file": "MapTools.html",
+      "count": 1
+    },
+    {
+      "file": "MapTools.html",
+      "count": 1
+    },
+    {
+      "file": "MapTools.html",
+      "count": 1
+    },
+    {
+      "file": "MapTools.html",
+      "count": 1
+    },
+    {
+      "file": "MapTools.html",
+      "count": 1
+    }
+  ],
+  "files": {
+    "Code.gs": "032f4379141cf49df0bc67466504364db49eaaa65ac0f161d7a8b5d021f3c5fd",
+    "Index.html": "cd445e2379581ef80372a362a5b23d572c541fa6127a380fe7ab9fb4b848ac68",
+    "AccessMapTools.gs": "b91c7d2ba9d060a89ab243cea1b3c52671fda3e885c5266ef37350917b494afd",
+    "MapTools.html": "a3c47080b1ab7808c96f50217d40822c761de5b89e2a70129654b5079541f355",
+    "appsscript.json": "b98b73ed63f54d9d79c69a0f782dd49030016e013df283631c9648c627782d51",
+    "Geography.html": "dd0f696acc75b873b897059c015b1734ce2e22f60d30f8b7484c3668c3fd5ee1",
+    "CoverageUX.html": "f81fdded7669a74182ca25b0307902a7c2c3e17cd070ccfb57c112b2be322acc"
+  }
+}

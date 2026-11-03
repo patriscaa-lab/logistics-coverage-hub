@@ -1,0 +1,37 @@
+{
+  "date": "2026-11-03",
+  "deploymentVersion": 8,
+  "currentRevisionTime": "November 3, 10:11 AM",
+  "versionCreatedTime": "November 3, 10:14 AM",
+  "capture": "Native editor select-all/copy into Notepad. Large files saved as UTF-8; small files verified against Notepad character count. SHA256 uses LF normalization.",
+  "files": {
+    "Code.gs": {
+      "characters": 18602,
+      "sha256": "2e188aac4296e1e1631f40e994adde08ebbcb838f9dc758ffeca0b3dec475f0e"
+    },
+    "Index.html": {
+      "characters": 267370,
+      "sha256": "26e8b685ee63eb42712379309f371f0a5d9dd8f280dcf0e40f134f7cf1d12962"
+    },
+    "AccessMapTools.gs": {
+      "characters": 3761,
+      "sha256": "b91c7d2ba9d060a89ab243cea1b3c52671fda3e885c5266ef37350917b494afd"
+    },
+    "MapTools.html": {
+      "characters": 13852,
+      "sha256": "aed9978a1a2d3b5acb6ee8fe0d5a4eb30066911541aa1224d1ecc311beffd23f"
+    },
+    "appsscript.json": {
+      "characters": 477,
+      "sha256": "b98b73ed63f54d9d79c69a0f782dd49030016e013df283631c9648c627782d51"
+    }
+  },
+  "deployedVersionVerified": true,
+  "deployedMatches": {
+    "Code": true,
+    "Index": true,
+    "AccessMapTools": true,
+    "MapTools": true,
+    "Manifest": true
+  }
+}
